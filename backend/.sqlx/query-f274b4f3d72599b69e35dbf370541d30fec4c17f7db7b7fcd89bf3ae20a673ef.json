@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n             SELECT 1 FROM varian v\n             WHERE v.id_produk = $1 AND (\n               EXISTS (SELECT 1 FROM detail_transaksi d WHERE d.id_varian = v.id_varian)\n               OR EXISTS (SELECT 1 FROM mutasi_stok m WHERE m.id_varian = v.id_varian)\n               OR EXISTS (SELECT 1 FROM detail_barang_masuk b WHERE b.id_varian = v.id_varian)\n             )\n           ) AS \"ada!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ada!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f274b4f3d72599b69e35dbf370541d30fec4c17f7db7b7fcd89bf3ae20a673ef"
+}

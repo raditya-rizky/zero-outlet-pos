@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE produk SET kode = $2, nama = $3, id_kategori = $4, harga_beli = $5, harga_jual = $6, aktif = $7\n           WHERE id_produk = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Int8",
+        "Int8",
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d251e894964524a5db2dd1a063b70aba36a14a43f3ea4acb9057efecd421e724"
+}

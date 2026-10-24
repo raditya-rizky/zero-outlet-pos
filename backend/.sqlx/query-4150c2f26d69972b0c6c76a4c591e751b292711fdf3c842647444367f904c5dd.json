@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO varian (id_produk, sku, ukuran, warna, stok_minimum) VALUES ($1, $2, $3, $4, 3) RETURNING id_varian",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4150c2f26d69972b0c6c76a4c591e751b292711fdf3c842647444367f904c5dd"
+}

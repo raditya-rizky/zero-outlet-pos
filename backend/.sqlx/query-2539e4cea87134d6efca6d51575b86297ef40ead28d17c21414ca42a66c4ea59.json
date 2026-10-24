@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO detail_transaksi (id_transaksi, id_varian, nama_barang, jumlah, harga_satuan, harga_pokok, diskon_item, subtotal)\n               VALUES ($1, $2, $3, $4, $5, $6, 0, $7)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8",
+        "Text",
+        "Int4",
+        "Int8",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2539e4cea87134d6efca6d51575b86297ef40ead28d17c21414ca42a66c4ea59"
+}

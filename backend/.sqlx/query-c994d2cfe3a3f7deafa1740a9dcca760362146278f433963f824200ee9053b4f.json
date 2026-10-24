@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE pengguna SET nama = $2, peran = $3, kata_sandi = coalesce($4, kata_sandi) WHERE id_pengguna = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c994d2cfe3a3f7deafa1740a9dcca760362146278f433963f824200ee9053b4f"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"total!\" FROM log_aktivitas l\n           WHERE ($1::bigint IS NULL OR l.id_pengguna = $1)\n             AND ($2::text IS NULL OR l.aksi = $2)\n             AND ($3::date IS NULL OR l.waktu >= $3::date::timestamp AT TIME ZONE $5)\n             AND ($4::date IS NULL OR l.waktu < ($4::date + 1)::timestamp AT TIME ZONE $5)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Date",
+        "Date",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "33c7cac0277ae667bdb8ad0102f6c4d12da97f2dbfc421fe2b70a44d6eff88ff"
+}

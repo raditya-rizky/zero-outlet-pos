@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id_pengguna FROM pengguna WHERE peran = 'admin' ORDER BY id_pengguna LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9c370a2b72796372f36cc0808165c1b12a63de8ebc701ad246763358bf980b82"
+}

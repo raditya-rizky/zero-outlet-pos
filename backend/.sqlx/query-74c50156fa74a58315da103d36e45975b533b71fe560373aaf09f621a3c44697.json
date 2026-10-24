@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO kategori (nama_kategori) VALUES ($1) RETURNING id_kategori, nama_kategori",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_kategori",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nama_kategori",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "74c50156fa74a58315da103d36e45975b533b71fe560373aaf09f621a3c44697"
+}

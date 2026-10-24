@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE sesi_login s SET terakhir_aktif = now()\n               FROM pengguna p\n               WHERE s.token_hash = $1\n                 AND p.id_pengguna = s.id_pengguna\n                 AND p.aktif\n                 AND s.terakhir_aktif > now() - make_interval(mins => $2)\n               RETURNING p.id_pengguna, p.nama, p.username, p.peran",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nama",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "username",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "peran",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b220c767055e1f8c4dc7967cdef70fc9320798415ece625afbfe96ffe854b436"
+}

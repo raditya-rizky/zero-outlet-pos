@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO kategori (nama_kategori) VALUES ($1)\n               ON CONFLICT (nama_kategori) DO UPDATE SET nama_kategori = EXCLUDED.nama_kategori\n               RETURNING id_kategori",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_kategori",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6f48ad50b88de6b4e883c1d26775715eef383ba0e5300ff60b8f449725edad2d"
+}

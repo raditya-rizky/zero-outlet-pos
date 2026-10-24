@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM produk) AS \"ada!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ada!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9282a52d946ad50981da71d491c520f3ee1a61caf3e961f1d096a42c00223e86"
+}

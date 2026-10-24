@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM produk WHERE id_produk = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "85dc3a0c8b96282c12eeb8aac85b354965b3154f5303638b50b0cc68692e0a52"
+}

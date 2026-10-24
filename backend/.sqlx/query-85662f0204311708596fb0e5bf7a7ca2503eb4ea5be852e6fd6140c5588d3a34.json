@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT l.id_log, l.waktu, l.id_pengguna, p.nama AS \"nama_pengguna?\", l.aksi, l.objek, l.id_objek,\n                  l.nilai_lama, l.nilai_baru, l.keterangan\n           FROM log_aktivitas l LEFT JOIN pengguna p ON p.id_pengguna = l.id_pengguna\n           WHERE ($1::bigint IS NULL OR l.id_pengguna = $1)\n             AND ($2::text IS NULL OR l.aksi = $2)\n             AND ($3::date IS NULL OR l.waktu >= $3::date::timestamp AT TIME ZONE $5)\n             AND ($4::date IS NULL OR l.waktu < ($4::date + 1)::timestamp AT TIME ZONE $5)\n           ORDER BY l.waktu DESC, l.id_log DESC\n           LIMIT $6 OFFSET $7",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_log",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "waktu",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "nama_pengguna?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "aksi",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "objek",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "id_objek",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "nilai_lama",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "nilai_baru",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 9,
+        "name": "keterangan",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Date",
+        "Date",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "85662f0204311708596fb0e5bf7a7ca2503eb4ea5be852e6fd6140c5588d3a34"
+}

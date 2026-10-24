@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO sesi_kasir (id_pengguna, modal_awal) VALUES ($1, $2) RETURNING id_sesi",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_sesi",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1cd1b5333731ca84ace52e14c8cef8e07397fcd5ac45c03a97557b9e27bbba6d"
+}

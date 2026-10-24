@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"jumlah!\",\n                  coalesce(sum(total) FILTER (WHERE metode_bayar = 'tunai'), 0)::bigint AS \"tunai!\",\n                  coalesce(sum(total) FILTER (WHERE metode_bayar = 'transfer'), 0)::bigint AS \"transfer!\",\n                  coalesce(sum(total) FILTER (WHERE metode_bayar = 'qris'), 0)::bigint AS \"qris!\"\n           FROM transaksi WHERE id_sesi = $1 AND status = 'selesai'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jumlah!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "tunai!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "transfer!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "qris!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "a733df932b0047dbacd460ea625644a558c71f26b20ff05b7868f6e3754b9908"
+}

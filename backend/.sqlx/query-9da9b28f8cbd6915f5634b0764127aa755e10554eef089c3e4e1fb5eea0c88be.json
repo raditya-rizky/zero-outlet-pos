@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE transaksi SET jumlah_cetak = jumlah_cetak + 1 WHERE id_transaksi = $1 RETURNING jumlah_cetak",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jumlah_cetak",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9da9b28f8cbd6915f5634b0764127aa755e10554eef089c3e4e1fb5eea0c88be"
+}

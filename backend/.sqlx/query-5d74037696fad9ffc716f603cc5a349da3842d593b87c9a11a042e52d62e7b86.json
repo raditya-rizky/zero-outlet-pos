@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id_sesi, s.id_pengguna, p.nama AS nama_kasir, s.waktu_buka, s.modal_awal, s.waktu_tutup,\n                  s.kas_fisik, s.kas_seharusnya, s.selisih, s.alasan_selisih\n           FROM sesi_kasir s JOIN pengguna p ON p.id_pengguna = s.id_pengguna\n           WHERE s.id_sesi = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_sesi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama_kasir",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "waktu_buka",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "modal_awal",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "waktu_tutup",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "kas_fisik",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "kas_seharusnya",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "selisih",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 9,
+        "name": "alasan_selisih",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "5d74037696fad9ffc716f603cc5a349da3842d593b87c9a11a042e52d62e7b86"
+}

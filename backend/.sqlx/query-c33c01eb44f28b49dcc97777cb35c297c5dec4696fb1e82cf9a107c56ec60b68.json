@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id_sesi FROM sesi_kasir WHERE id_pengguna = $1 AND waktu_tutup IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_sesi",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c33c01eb44f28b49dcc97777cb35c297c5dec4696fb1e82cf9a107c56ec60b68"
+}

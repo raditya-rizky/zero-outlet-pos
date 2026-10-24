@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE varian SET stok = stok + $2 WHERE id_varian = $1 AND stok + $2 >= 0 RETURNING stok",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "stok",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "aafd69119b494b690f6a375f6115185463417595f3fb0bb5b84034202741444d"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO log_aktivitas (id_pengguna, aksi, objek, id_objek, nilai_lama, nilai_baru, keterangan)\n           VALUES ($1, $2, $3, $4, $5, $6, $7)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "762b7545091ee9bcd307ff056f538dedbbcd06440713397d0e1e238ec38b49ba"
+}

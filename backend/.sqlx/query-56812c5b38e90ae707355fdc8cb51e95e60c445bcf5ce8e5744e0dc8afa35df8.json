@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE pengguna SET aktif = $2 WHERE id_pengguna = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "56812c5b38e90ae707355fdc8cb51e95e60c445bcf5ce8e5744e0dc8afa35df8"
+}

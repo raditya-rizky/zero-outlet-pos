@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id_produk FROM varian v JOIN produk p USING (id_produk)\n           WHERE upper(v.sku) = upper($1) AND v.aktif AND p.aktif",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_produk",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8b59bca3f2c36d26e8c60bbd6e95aed9a4ce94fee59ebeca33aeb4fc626b9bf4"
+}

@@ -1,0 +1,74 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id_transaksi, t.no_faktur, t.tanggal_waktu, t.id_pengguna, p.nama AS nama_kasir,\n                  t.total, t.metode_bayar, t.status,\n                  (SELECT coalesce(sum(d.jumlah), 0) FROM detail_transaksi d WHERE d.id_transaksi = t.id_transaksi)::bigint AS \"jumlah_barang!\"\n           FROM transaksi t JOIN pengguna p ON p.id_pengguna = t.id_pengguna\n           WHERE ($1::bigint IS NULL OR t.id_pengguna = $1)\n             AND ($2::text IS NULL OR t.no_faktur ILIKE '%' || $2 || '%')\n             AND ($3::date IS NULL OR t.tanggal_waktu >= $3::date::timestamp AT TIME ZONE $5)\n             AND ($4::date IS NULL OR t.tanggal_waktu < ($4::date + 1)::timestamp AT TIME ZONE $5)\n           ORDER BY t.tanggal_waktu DESC\n           LIMIT 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_transaksi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "no_faktur",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "tanggal_waktu",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "nama_kasir",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "total",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "metode_bayar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "jumlah_barang!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Date",
+        "Date",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "c365343bb9bae47410499d32d3e4e1db0a70838016cdd7abcf696c41631d7f0b"
+}

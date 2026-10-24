@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM sesi_login WHERE id_pengguna = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "936ca8b9878a54f55bbc31900f3a31f0e3d05666c30d6cb14d245c59f6d1cb46"
+}

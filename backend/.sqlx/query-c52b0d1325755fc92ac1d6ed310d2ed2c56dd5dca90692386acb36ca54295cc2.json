@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO produk (kode, nama, id_kategori, harga_beli, harga_jual, aktif)\n           VALUES ($1, $2, $3, $4, $5, $6) RETURNING id_produk",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_produk",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8",
+        "Int8",
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c52b0d1325755fc92ac1d6ed310d2ed2c56dd5dca90692386acb36ca54295cc2"
+}

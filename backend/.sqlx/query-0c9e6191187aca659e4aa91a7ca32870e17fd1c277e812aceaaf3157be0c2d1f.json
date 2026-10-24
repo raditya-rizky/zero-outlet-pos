@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id_pengguna, nama, username, peran, kata_sandi, aktif FROM pengguna WHERE username = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nama",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "username",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "peran",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "kata_sandi",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "aktif",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0c9e6191187aca659e4aa91a7ca32870e17fd1c277e812aceaaf3157be0c2d1f"
+}

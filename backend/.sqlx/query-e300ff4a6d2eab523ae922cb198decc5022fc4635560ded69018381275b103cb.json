@@ -1,0 +1,65 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id_varian, id_produk, sku, ukuran, warna, stok, stok_minimum, aktif\n           FROM varian\n           WHERE id_produk = ANY($1) AND ($2 OR aktif)\n           ORDER BY id_produk,\n                    array_position(ARRAY['XS','S','M','L','XL','XXL','XXXL'], upper(ukuran)) NULLS LAST,\n                    ukuran, warna",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "sku",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "ukuran",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "warna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "stok",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "stok_minimum",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "aktif",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8Array",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e300ff4a6d2eab523ae922cb198decc5022fc4635560ded69018381275b103cb"
+}

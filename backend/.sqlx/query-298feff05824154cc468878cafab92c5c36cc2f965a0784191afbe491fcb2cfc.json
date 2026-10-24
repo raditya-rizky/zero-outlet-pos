@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id_detail, id_varian, nama_barang, jumlah, harga_satuan, diskon_item, subtotal\n           FROM detail_transaksi WHERE id_transaksi = $1 ORDER BY id_detail",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_detail",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama_barang",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "jumlah",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "harga_satuan",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "diskon_item",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "subtotal",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "298feff05824154cc468878cafab92c5c36cc2f965a0784191afbe491fcb2cfc"
+}

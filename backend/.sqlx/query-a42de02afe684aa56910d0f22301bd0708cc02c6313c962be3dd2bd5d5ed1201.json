@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE produk SET aktif = FALSE WHERE id_produk = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a42de02afe684aa56910d0f22301bd0708cc02c6313c962be3dd2bd5d5ed1201"
+}

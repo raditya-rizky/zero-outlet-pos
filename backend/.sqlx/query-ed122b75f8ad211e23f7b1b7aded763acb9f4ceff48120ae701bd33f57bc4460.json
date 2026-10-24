@@ -1,0 +1,68 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id_produk, p.kode, p.nama, p.id_kategori, k.nama_kategori, p.harga_beli, p.harga_jual, p.aktif\n           FROM produk p JOIN kategori k ON k.id_kategori = p.id_kategori\n           WHERE ($2::bigint IS NULL OR p.id_kategori = $2)\n             AND ($3::bool IS NULL OR p.aktif = $3)\n             AND ($4::bigint IS NULL OR p.id_produk = $4)\n             -- Setiap kata harus cocok dengan produk atau salah satu variannya.\n             AND NOT EXISTS (\n               SELECT 1 FROM unnest($1::text[]) AS t(kata)\n               WHERE NOT (\n                 p.nama ILIKE '%' || t.kata || '%'\n                 OR p.kode ILIKE '%' || t.kata || '%'\n                 OR k.nama_kategori ILIKE '%' || t.kata || '%'\n                 OR EXISTS (\n                   SELECT 1 FROM varian v\n                   WHERE v.id_produk = p.id_produk AND ($5 OR v.aktif)\n                     AND (v.sku ILIKE '%' || t.kata || '%' OR v.ukuran ILIKE t.kata OR v.warna ILIKE '%' || t.kata || '%')\n                 )\n               )\n             )\n           ORDER BY p.nama\n           LIMIT 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "kode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "id_kategori",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "nama_kategori",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "harga_beli",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "harga_jual",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "aktif",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Int8",
+        "Bool",
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ed122b75f8ad211e23f7b1b7aded763acb9f4ceff48120ae701bd33f57bc4460"
+}

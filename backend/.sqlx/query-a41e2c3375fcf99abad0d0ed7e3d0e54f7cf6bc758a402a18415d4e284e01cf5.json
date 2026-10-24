@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE varian SET sku = $2, ukuran = $3, warna = $4, stok_minimum = $5, aktif = $6 WHERE id_varian = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a41e2c3375fcf99abad0d0ed7e3d0e54f7cf6bc758a402a18415d4e284e01cf5"
+}
