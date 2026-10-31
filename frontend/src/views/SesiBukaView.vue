@@ -45,7 +45,7 @@ async function buka() {
 
 <template>
   <UiHalaman ukuran="sempit">
-    <form class="grid gap-[18px] rounded-sedang border border-garis bg-white p-6" @submit.prevent="buka">
+    <form class="grid gap-[18px]" @submit.prevent="buka">
       <div>
         <h1>Buka sesi kasir</h1>
         <p class="mt-1.5 text-redup">Hitung uang di laci kas sebelum mulai melayani. Jumlah ini menjadi modal awal sesi.</p>

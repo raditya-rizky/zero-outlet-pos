@@ -1,19 +1,23 @@
 <script setup lang="ts">
+// Status sebagai titik berwarna dan teks; warna tidak pernah menjadi satu-satunya penanda.
 const props = withDefaults(defineProps<{ warna?: 'denim' | 'aman' | 'bahaya' | 'waspada' | 'netral' }>(), {
   warna: 'denim',
 })
 
 const kelas = {
-  denim: 'bg-denim-terang text-denim',
-  aman: 'bg-aman-terang text-aman',
-  bahaya: 'bg-bahaya-terang text-bahaya',
-  waspada: 'bg-waspada-terang text-waspada',
-  netral: 'bg-kertas text-redup',
+  denim: 'text-denim',
+  aman: 'text-aman',
+  bahaya: 'text-bahaya',
+  waspada: 'text-waspada',
+  netral: 'text-redup',
 }
 </script>
 
 <template>
-  <span class="inline-block rounded-full px-2 py-0.5 text-[0.8rem] font-semibold whitespace-nowrap" :class="kelas[props.warna]">
+  <span
+    class="inline-flex items-center gap-1.5 text-[0.85rem] font-medium whitespace-nowrap before:size-1.5 before:rounded-full before:bg-current"
+    :class="kelas[props.warna]"
+  >
     <slot />
   </span>
 </template>

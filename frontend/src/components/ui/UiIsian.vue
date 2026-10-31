@@ -6,7 +6,7 @@ defineProps<{ label: string; petunjuk?: string }>()
 <template>
   <label class="grid gap-1.5 text-[0.9rem] font-semibold">
     {{ label }}
-    <small v-if="petunjuk" class="font-normal text-redup">{{ petunjuk }}</small>
+    <small v-if="petunjuk" class="text-[0.8rem] font-normal text-redup">{{ petunjuk }}</small>
     <slot />
   </label>
 </template>

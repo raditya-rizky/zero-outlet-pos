@@ -49,8 +49,8 @@ function cetak() {
       </UiKepalaHalaman>
 
       <div class="flex flex-wrap items-start gap-6">
-        <div class="rounded-sedang bg-garis p-4 print:bg-transparent print:p-0">
-          <KertasStruk :struk="struk" class="shadow-kartu print:shadow-none" />
+        <div class="rounded-sedang bg-kertas p-6 print:bg-transparent print:p-0">
+          <KertasStruk :struk="struk" class="border border-garis print:border-0" />
         </div>
         <div class="grid flex-[1_1_220px] gap-2.5 print:hidden">
           <UiTombol ref="tombolCetak" ukuran="besar" @click="cetak">Cetak struk</UiTombol>

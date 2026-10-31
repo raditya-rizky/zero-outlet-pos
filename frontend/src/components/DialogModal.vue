@@ -13,7 +13,7 @@ onMounted(() => dialog.value?.showModal())
   <dialog
     ref="dialog"
     :aria-labelledby="idJudul"
-    class="m-auto max-h-[calc(100dvh-32px)] w-[min(520px,calc(100vw-32px))] rounded-sedang border-0 p-0 text-tinta shadow-dialog backdrop:bg-indigo/45"
+    class="m-auto max-h-[calc(100dvh-32px)] w-[min(520px,calc(100vw-32px))] rounded-sedang border-0 p-0 text-tinta shadow-dialog backdrop:bg-indigo/30"
     @cancel.prevent="emit('tutup')"
     @click.self="emit('tutup')"
   >

@@ -167,10 +167,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
       </p>
 
       <ul
-        class="overflow-y-auto rounded-sedang border border-garis bg-white max-[859px]:max-h-[60dvh]"
+        class="overflow-y-auto border-t border-garis max-[859px]:max-h-[60dvh]"
         :class="{ 'opacity-60': memuat }"
       >
-        <li v-for="p in hasil" :key="p.id_produk" class="grid gap-2.5 border-b border-garis px-3.5 py-3 last:border-b-0">
+        <li v-for="p in hasil" :key="p.id_produk" class="grid gap-2.5 border-b border-garis py-3.5">
           <div class="flex items-start justify-between gap-3">
             <div>
               <h3>{{ p.nama }}</h3>
@@ -183,7 +183,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
               v-for="v in p.varian"
               :key="v.id_varian"
               type="button"
-              class="inline-flex min-h-10 items-center gap-1.5 rounded-kecil border border-garis-kuat bg-white py-1 pr-1.5 pl-2.5 text-[0.9rem] text-tinta hover:enabled:border-denim hover:enabled:bg-denim-terang active:enabled:translate-y-px disabled:border-dashed disabled:bg-kertas disabled:text-redup disabled:opacity-100"
+              class="inline-flex min-h-10 items-center gap-1.5 rounded-kecil border border-garis-kuat bg-white px-2.5 py-1 text-[0.9rem] text-tinta hover:enabled:border-denim hover:enabled:text-denim active:enabled:translate-y-px disabled:border-garis disabled:bg-kertas disabled:text-redup disabled:opacity-100"
               :disabled="sisaStok(v) <= 0"
               :title="`${v.sku}, stok ${v.stok}`"
               @click="tambah(p, v)"
@@ -191,8 +191,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
               <strong>{{ v.ukuran }}</strong>
               <span>{{ v.warna }}</span>
               <span
-                class="min-w-[26px] rounded-[4px] px-1.5 py-px text-center text-[0.8rem] tabular-nums"
-                :class="sisaStok(v) > 0 && v.stok <= v.stok_minimum ? 'bg-waspada-terang font-bold text-waspada' : 'bg-kertas text-redup'"
+                class="text-[0.8rem] tabular-nums"
+                :class="sisaStok(v) > 0 && v.stok <= v.stok_minimum ? 'font-semibold text-waspada' : 'text-redup'"
               >
                 {{ sisaStok(v) > 0 ? sisaStok(v) : 'habis' }}
               </span>
@@ -204,7 +204,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
 
     <!-- Kolom kanan: keranjang -->
     <section
-      class="flex flex-col gap-3 border-t border-garis bg-white p-4 min-[860px]:overflow-hidden min-[860px]:border-t-0 min-[860px]:border-l"
+      class="flex flex-col gap-3 p-4 min-[860px]:overflow-hidden min-[860px]:border-l min-[860px]:border-garis"
       aria-label="Keranjang belanja"
     >
       <header class="flex items-center justify-between">
@@ -221,16 +221,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
       </p>
 
       <ul class="flex-1 overflow-y-auto">
-        <li v-for="item in keranjang.items" :key="item.id_varian" class="grid gap-2 border-b border-dashed border-garis-kuat py-2.5">
+        <li v-for="item in keranjang.items" :key="item.id_varian" class="grid gap-2 border-b border-garis py-3">
           <div class="grid">
             <strong>{{ item.nama }}</strong>
             <span class="text-sm text-redup">{{ item.ukuran }}, {{ item.warna }} / {{ rupiah(item.harga) }}</span>
           </div>
           <div class="flex items-center gap-2.5">
-            <div class="flex overflow-hidden rounded-kecil border border-garis-kuat">
+            <div class="flex overflow-hidden rounded-kecil border border-garis">
               <button
                 type="button"
-                class="w-10 bg-kertas text-xl text-tinta"
+                class="w-10 text-xl text-redup hover:bg-kertas hover:text-tinta"
                 :aria-label="`Kurangi ${item.nama}`"
                 @click="keranjang.ubahJumlah(item.id_varian, item.jumlah - 1)"
               >
@@ -245,7 +245,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
               />
               <button
                 type="button"
-                class="w-10 bg-kertas text-xl text-tinta"
+                class="w-10 text-xl text-redup hover:bg-kertas hover:text-tinta"
                 :aria-label="`Tambah ${item.nama}`"
                 :disabled="item.jumlah >= item.stok"
                 @click="keranjang.ubahJumlah(item.id_varian, item.jumlah + 1)"
@@ -256,7 +256,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
             <span class="ml-auto font-bold tabular-nums">{{ ribuan(item.jumlah * item.harga) }}</span>
             <button
               type="button"
-              class="size-9 rounded-kecil text-[1.4rem] leading-none text-redup hover:bg-bahaya-terang hover:text-bahaya"
+              class="size-9 rounded-kecil text-[1.4rem] leading-none text-redup hover:text-bahaya"
               :aria-label="`Hapus ${item.nama}`"
               @click="keranjang.hapus(item.id_varian)"
             >
@@ -266,7 +266,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
         </li>
       </ul>
 
-      <footer class="grid gap-3 border-t border-garis pt-3 max-[859px]:sticky max-[859px]:bottom-0 max-[859px]:bg-white max-[859px]:pb-3">
+      <footer class="grid gap-3 pt-2 max-[859px]:sticky max-[859px]:bottom-0 max-[859px]:bg-white max-[859px]:pb-3">
         <LabelHarga :nilai="keranjang.total" :keterangan="`Total ${keranjang.jumlahBarang} barang`" />
         <UiTombol ukuran="besar" :disabled="!keranjang.items.length" @click="bukaBayar">
           Bayar <span class="rounded-[4px] bg-white/20 px-1.5 py-px text-[0.8rem]">F2</span>
@@ -283,7 +283,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
           <label
             v-for="m in (['tunai', 'transfer', 'qris'] as const)"
             :key="m"
-            class="flex min-h-12 cursor-pointer items-center justify-center rounded-kecil border border-garis-kuat font-semibold has-checked:border-denim has-checked:bg-denim has-checked:text-white has-focus-visible:shadow-fokus"
+            class="flex min-h-12 cursor-pointer items-center justify-center rounded-kecil border border-garis-kuat font-medium has-checked:border-denim has-checked:bg-denim has-checked:text-white has-focus-visible:shadow-fokus"
           >
             <input v-model="metode" type="radio" name="metode" :value="m" class="sr-only" />
             {{ m === 'qris' ? 'QRIS' : m === 'tunai' ? 'Tunai' : 'Transfer' }}

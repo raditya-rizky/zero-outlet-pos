@@ -118,7 +118,7 @@ onMounted(async () => {
           <td class="whitespace-nowrap">{{ waktu(l.waktu) }}</td>
           <td>{{ l.nama_pengguna ?? 'Tidak dikenal' }}</td>
           <td>
-            <UiLencana :warna="l.aksi === 'login_gagal' ? 'bahaya' : 'denim'">{{ AKSI[l.aksi] ?? l.aksi }}</UiLencana>
+            <UiLencana :warna="l.aksi === 'login_gagal' ? 'bahaya' : 'netral'">{{ AKSI[l.aksi] ?? l.aksi }}</UiLencana>
           </td>
           <td class="whitespace-nowrap">{{ l.objek }}<span v-if="l.id_objek" class="text-redup"> #{{ l.id_objek }}</span></td>
           <td class="max-w-[480px] text-[0.9rem]">

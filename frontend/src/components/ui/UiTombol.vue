@@ -14,9 +14,9 @@ const props = withDefaults(
 
 const kelasVarian = {
   utama: 'border-transparent bg-denim text-white hover:not-disabled:bg-indigo-2',
-  kedua: 'border-garis-kuat bg-white text-tinta hover:not-disabled:bg-denim-terang',
-  bahaya: 'border-current bg-white text-bahaya hover:not-disabled:bg-bahaya-terang',
-  polos: 'border-transparent bg-transparent text-denim hover:not-disabled:bg-denim-terang',
+  kedua: 'border-garis-kuat bg-white text-tinta hover:not-disabled:bg-kertas',
+  bahaya: 'border-garis-kuat bg-white text-bahaya hover:not-disabled:border-bahaya hover:not-disabled:bg-bahaya-terang',
+  polos: 'border-transparent bg-transparent text-denim hover:not-disabled:bg-kertas',
 }
 
 const kelasUkuran = {

@@ -14,7 +14,7 @@ const lebar = {
 </script>
 
 <template>
-  <component :is="props.as" class="mx-auto grid gap-5 px-4 pt-6 pb-12" :class="lebar[props.ukuran]">
+  <component :is="props.as" class="mx-auto grid gap-8 px-4 pt-10 pb-16" :class="lebar[props.ukuran]">
     <slot />
   </component>
 </template>

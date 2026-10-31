@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 
 /*
- * Token visual Kasir Zero Outlet. Palet bawaan Tailwind dimatikan agar hanya
- * warna toko yang bisa dipakai: indigo denim untuk kerangka, putih kebiruan
- * untuk area kerja, dan kuning label harga khusus untuk angka total belanja.
+ * Token visual Kasir Zero Outlet, gaya minimalis: halaman putih, struktur dari
+ * garis tipis dan jarak (bukan kotak), denim satu-satunya warna aksi, dan
+ * kuning label harga khusus untuk angka total belanja. Palet bawaan Tailwind
+ * dimatikan agar hanya warna toko yang bisa dipakai.
  */
 @theme {
   --color-*: initial;
@@ -11,15 +12,13 @@
   --color-black: #000000;
   --color-indigo: #1c2a52;
   --color-indigo-2: #2a3c6e;
-  --color-indigo-pudar: #c9d3ec;
-  --color-indigo-samar: #aab6d4;
   --color-denim: #2f4f94;
   --color-denim-terang: #e6ecf8;
   --color-tag: #f2c230;
   --color-tag-gelap: #8a6a00;
-  --color-kertas: #f4f6fa;
-  --color-garis: #d8deea;
-  --color-garis-kuat: #b9c2d6;
+  --color-kertas: #f7f8fa;
+  --color-garis: #e6e9f0;
+  --color-garis-kuat: #cfd5e1;
   --color-tinta: #172036;
   --color-redup: #5b6681;
   --color-bahaya: #b8402a;
@@ -38,9 +37,7 @@
   --radius-kecil: 6px;
   --radius-sedang: 10px;
 
-  --shadow-kartu: 0 1px 2px rgb(23 32 54 / 0.06), 0 4px 16px rgb(23 32 54 / 0.06);
-  --shadow-dialog: 0 20px 60px rgb(23 32 54 / 0.3);
-  --shadow-login: 0 24px 60px rgb(0 0 0 / 0.25);
+  --shadow-dialog: 0 12px 40px rgb(23 32 54 / 0.16);
   --shadow-fokus: 0 0 0 3px rgb(47 79 148 / 0.35);
 }
 
@@ -51,12 +48,12 @@
     font-family: var(--font-sans);
     line-height: 1.5;
     color: var(--color-tinta);
-    background: var(--color-kertas);
+    background: var(--color-white);
     -webkit-font-smoothing: antialiased;
   }
   body {
     min-height: 100dvh;
-    background: var(--color-kertas);
+    background: var(--color-white);
   }
 
   h1,
@@ -69,6 +66,7 @@
   }
   h1 {
     font-size: 1.6rem;
+    font-weight: 650;
   }
   h2 {
     font-size: 1.2rem;
@@ -90,6 +88,8 @@
     border: 1px solid var(--color-garis-kuat);
     border-radius: var(--radius-kecil);
     background: var(--color-white);
+    /* Kontrol berada di dalam label tebal; isian tetap berbobot normal. */
+    font-weight: 400;
   }
   textarea {
     min-height: 80px;
@@ -129,11 +129,11 @@
     border-bottom: 1px solid var(--color-garis);
   }
   th {
-    font-size: 0.85rem;
+    padding-block: 8px;
+    font-size: 0.8rem;
     font-weight: 600;
     white-space: nowrap;
     color: var(--color-redup);
-    background: var(--color-kertas);
   }
   tbody tr:last-child td {
     border-bottom: 0;

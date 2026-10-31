@@ -34,13 +34,13 @@ async function masuk() {
 
 <template>
   <div
-    class="grid min-h-dvh place-items-center bg-indigo bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.03)_0_2px,transparent_2px_9px)] px-4 py-6"
+    class="grid min-h-dvh place-items-center bg-white px-4 py-6"
   >
-    <form class="grid w-full max-w-[400px] gap-[18px] rounded-sedang bg-white px-6 py-7 shadow-login" @submit.prevent="masuk">
-      <div class="mb-1 flex items-center gap-3">
-        <svg viewBox="0 0 32 32" width="44" height="44" aria-hidden="true">
+    <form class="grid w-full max-w-[360px] gap-[18px]" @submit.prevent="masuk">
+      <div class="mb-4 flex items-center gap-3">
+        <svg viewBox="0 0 32 32" width="36" height="36" aria-hidden="true">
           <path d="M4 6h14l10 10-12 12L4 18z" fill="var(--color-tag)" />
-          <circle cx="10" cy="12" r="2.5" fill="var(--color-indigo)" />
+          <circle cx="10" cy="12" r="2.5" fill="var(--color-white)" />
         </svg>
         <div>
           <h1 class="text-[1.7rem] font-extrabold font-stretch-125%">Zero Outlet</h1>

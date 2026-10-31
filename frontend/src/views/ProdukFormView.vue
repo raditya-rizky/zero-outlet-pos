@@ -153,7 +153,7 @@ onMounted(async () => {
 
     <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-    <section class="grid gap-4 rounded-sedang border border-garis bg-white p-5">
+    <section class="grid gap-4">
       <h2>Data produk</h2>
       <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] items-end gap-4">
         <UiIsian label="Kode produk"><input v-model="kode" required placeholder="mis. KMJ-FLN" /></UiIsian>
@@ -165,7 +165,7 @@ onMounted(async () => {
           </select>
         </UiIsian>
         <div class="flex items-end gap-2">
-          <UiIsian label="Atau kategori baru" class="flex-1"><input v-model="kategoriBaru" placeholder="mis. Batik" /></UiIsian>
+          <UiIsian label="Kategori baru" class="flex-1"><input v-model="kategoriBaru" placeholder="mis. Batik" /></UiIsian>
           <UiTombol type="button" varian="kedua" :disabled="!kategoriBaru.trim()" @click="tambahKategori">Tambah</UiTombol>
         </div>
         <UiIsian label="Harga beli (Rp)">
@@ -178,7 +178,7 @@ onMounted(async () => {
       </div>
     </section>
 
-    <section class="grid gap-4 rounded-sedang border border-garis bg-white p-5">
+    <section class="grid gap-4 border-t border-garis pt-8">
       <div>
         <h2>Varian ukuran dan warna</h2>
         <p class="text-sm text-redup">SKU dibuat otomatis dari kode, ukuran, dan warna bila dikosongkan. Isi SKU bila barang sudah memiliki barcode.</p>

@@ -67,7 +67,7 @@ async function tutup() {
     <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
     <template v-if="rekap">
-      <div class="grid gap-3 rounded-sedang border border-garis bg-white p-5">
+      <div class="grid gap-3">
         <h2>Kas di laci</h2>
         <dl class="grid gap-1.5 [&_dd]:font-semibold [&>div]:flex [&>div]:justify-between [&>div]:gap-3">
           <div><dt>Modal awal</dt><dd class="tabular-nums">{{ rupiah(rekap.sesi.modal_awal) }}</dd></div>
@@ -88,7 +88,7 @@ async function tutup() {
         </p>
       </div>
 
-      <div v-if="hasil" class="grid gap-4 rounded-sedang border border-garis bg-white p-5">
+      <div v-if="hasil" class="grid gap-4 border-t border-garis pt-8">
         <UiPesan :jenis="hasil.sesi.selisih === 0 ? 'berhasil' : 'info'">
           Kas fisik {{ rupiah(hasil.sesi.kas_fisik ?? 0) }}. {{ tandaSelisih(hasil.sesi.selisih ?? 0) }}.
           <template v-if="hasil.sesi.alasan_selisih"> Alasan: {{ hasil.sesi.alasan_selisih }}</template>
@@ -99,7 +99,7 @@ async function tutup() {
         </div>
       </div>
 
-      <form v-else class="grid gap-4 rounded-sedang border border-garis bg-white p-5" @submit.prevent="tutup">
+      <form v-else class="grid gap-4 border-t border-garis pt-8" @submit.prevent="tutup">
         <UiIsian label="Kas fisik yang dihitung" petunjuk="Hitung seluruh uang tunai di laci, termasuk modal awal.">
           <input v-model="kasFisik" inputmode="numeric" class="min-h-14 text-2xl font-bold tabular-nums" placeholder="0" autofocus @blur="rapikan" />
         </UiIsian>
