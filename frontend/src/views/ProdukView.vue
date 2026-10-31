@@ -4,6 +4,13 @@ import { useRoute } from 'vue-router'
 import { api, pesanError } from '@/api'
 import { rupiah } from '@/format'
 import type { Kategori, Produk } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
+import UiLencana from '@/components/ui/UiLencana.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTabel from '@/components/ui/UiTabel.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const route = useRoute()
 const cari = ref('')
@@ -44,72 +51,64 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="halaman">
-    <div class="kepala-halaman">
-      <div>
-        <h1>Produk</h1>
-        <p class="redup">Model pakaian beserta varian ukuran dan warnanya. Stok dicatat per varian.</p>
-      </div>
-      <RouterLink to="/admin/produk/baru" class="tombol">Tambah produk</RouterLink>
-    </div>
+  <UiHalaman>
+    <UiKepalaHalaman judul="Produk">
+      <template #deskripsi>Model pakaian beserta varian ukuran dan warnanya. Stok dicatat per varian.</template>
+      <template #aksi><UiTombol to="/admin/produk/baru">Tambah produk</UiTombol></template>
+    </UiKepalaHalaman>
 
-    <p v-if="pesan" class="pesan berhasil">{{ pesan }}</p>
+    <UiPesan v-if="pesan" jenis="berhasil">{{ pesan }}</UiPesan>
 
-    <div class="saring">
-      <label class="isian">Cari <input v-model="cari" type="search" placeholder="Nama, kode, SKU, warna" /></label>
-      <label class="isian">
-        Kategori
+    <div class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_160px]">
+      <UiIsian label="Cari"><input v-model="cari" type="search" placeholder="Nama, kode, SKU, warna" /></UiIsian>
+      <UiIsian label="Kategori">
         <select v-model="idKategori">
           <option value="">Semua kategori</option>
           <option v-for="k in kategori" :key="k.id_kategori" :value="k.id_kategori">{{ k.nama_kategori }}</option>
         </select>
-      </label>
-      <label class="isian">
-        Status
+      </UiIsian>
+      <UiIsian label="Status">
         <select v-model="status">
           <option value="aktif">Dijual</option>
           <option value="nonaktif">Nonaktif</option>
           <option value="semua">Semua</option>
         </select>
-      </label>
+      </UiIsian>
     </div>
 
-    <p v-if="galat" class="pesan galat">{{ galat }}</p>
+    <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-    <div class="tabel-bungkus">
-      <table>
-        <thead>
-          <tr>
-            <th>Produk</th>
-            <th>Kategori</th>
-            <th class="kanan">Harga beli</th>
-            <th class="kanan">Harga jual</th>
-            <th class="kanan">Varian</th>
-            <th class="kanan">Stok</th>
-            <th>Keterangan</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="p in data" :key="p.id_produk">
-            <td>
-              <strong>{{ p.nama }}</strong><br />
-              <span class="kecil redup">{{ p.kode }}</span>
-            </td>
-            <td>{{ p.nama_kategori }}</td>
-            <td class="kanan angka">{{ rupiah(p.harga_beli ?? 0) }}</td>
-            <td class="kanan angka">{{ rupiah(p.harga_jual) }}</td>
-            <td class="kanan angka">{{ p.varian.filter((v) => v.aktif).length }}</td>
-            <td class="kanan angka">{{ totalStok(p) }}</td>
-            <td>
-              <span v-if="!p.aktif" class="lencana netral">Nonaktif</span>
-              <span v-else-if="menipis(p)" class="lencana waspada">{{ menipis(p) }} varian menipis</span>
-            </td>
-            <td class="kanan"><RouterLink :to="`/admin/produk/${p.id_produk}`" class="tombol polos">Ubah</RouterLink></td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-if="!memuat && !data.length" class="kosong">Belum ada produk yang cocok. Tambahkan produk baru atau ubah saringan.</p>
-    </div>
-  </div>
+    <UiTabel :kosong="!memuat && !data.length ? 'Belum ada produk yang cocok. Tambahkan produk baru atau ubah saringan.' : null">
+      <thead>
+        <tr>
+          <th>Produk</th>
+          <th>Kategori</th>
+          <th class="text-right">Harga beli</th>
+          <th class="text-right">Harga jual</th>
+          <th class="text-right">Varian</th>
+          <th class="text-right">Stok</th>
+          <th>Keterangan</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="p in data" :key="p.id_produk">
+          <td>
+            <strong>{{ p.nama }}</strong><br />
+            <span class="text-sm text-redup">{{ p.kode }}</span>
+          </td>
+          <td>{{ p.nama_kategori }}</td>
+          <td class="text-right tabular-nums">{{ rupiah(p.harga_beli ?? 0) }}</td>
+          <td class="text-right tabular-nums">{{ rupiah(p.harga_jual) }}</td>
+          <td class="text-right tabular-nums">{{ p.varian.filter((v) => v.aktif).length }}</td>
+          <td class="text-right tabular-nums">{{ totalStok(p) }}</td>
+          <td>
+            <UiLencana v-if="!p.aktif" warna="netral">Nonaktif</UiLencana>
+            <UiLencana v-else-if="menipis(p)" warna="waspada">{{ menipis(p) }} varian menipis</UiLencana>
+          </td>
+          <td class="text-right"><UiTombol :to="`/admin/produk/${p.id_produk}`" varian="polos">Ubah</UiTombol></td>
+        </tr>
+      </tbody>
+    </UiTabel>
+  </UiHalaman>
 </template>

@@ -5,6 +5,13 @@ import { useAuth } from '@/stores/auth'
 import { waktu } from '@/format'
 import DialogModal from '@/components/DialogModal.vue'
 import type { Pengguna, Peran } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
+import UiLencana from '@/components/ui/UiLencana.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTabel from '@/components/ui/UiTabel.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const auth = useAuth()
 const data = ref<Pengguna[]>([])
@@ -69,86 +76,68 @@ onMounted(muat)
 </script>
 
 <template>
-  <div class="halaman">
-    <div class="kepala-halaman">
-      <div>
-        <h1>Pengguna</h1>
-        <p class="redup">Akun kasir dan pemilik. Akun yang tidak dipakai lagi dinonaktifkan, bukan dihapus, agar riwayatnya tetap tercatat.</p>
-      </div>
-      <button class="tombol" @click="tambah">Tambah pengguna</button>
-    </div>
+  <UiHalaman>
+    <UiKepalaHalaman judul="Pengguna">
+      <template #deskripsi>
+        Akun kasir dan pemilik. Akun yang tidak dipakai lagi dinonaktifkan, bukan dihapus, agar riwayatnya tetap tercatat.
+      </template>
+      <template #aksi><UiTombol @click="tambah">Tambah pengguna</UiTombol></template>
+    </UiKepalaHalaman>
 
-    <p v-if="pesan" class="pesan berhasil">{{ pesan }}</p>
-    <p v-if="galat" class="pesan galat">{{ galat }}</p>
+    <UiPesan v-if="pesan" jenis="berhasil">{{ pesan }}</UiPesan>
+    <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-    <div class="tabel-bungkus">
-      <table>
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Nama pengguna</th>
-            <th>Peran</th>
-            <th>Status</th>
-            <th>Dibuat</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="p in data" :key="p.id_pengguna">
-            <td><strong>{{ p.nama }}</strong></td>
-            <td>{{ p.username }}</td>
-            <td>{{ p.peran === 'admin' ? 'Pemilik/Admin' : 'Kasir' }}</td>
-            <td>
-              <span class="lencana" :class="p.aktif ? 'aman' : 'netral'">{{ p.aktif ? 'Aktif' : 'Nonaktif' }}</span>
-            </td>
-            <td>{{ waktu(p.dibuat_pada) }}</td>
-            <td class="kanan aksi">
-              <button class="tombol polos" @click="ubah(p)">Ubah</button>
-              <button v-if="p.id_pengguna !== auth.pengguna?.id_pengguna" class="tombol polos" @click="ubahStatus(p)">
-                {{ p.aktif ? 'Nonaktifkan' : 'Aktifkan' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <UiTabel>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Nama pengguna</th>
+          <th>Peran</th>
+          <th>Status</th>
+          <th>Dibuat</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="p in data" :key="p.id_pengguna">
+          <td><strong>{{ p.nama }}</strong></td>
+          <td>{{ p.username }}</td>
+          <td>{{ p.peran === 'admin' ? 'Pemilik/Admin' : 'Kasir' }}</td>
+          <td>
+            <UiLencana :warna="p.aktif ? 'aman' : 'netral'">{{ p.aktif ? 'Aktif' : 'Nonaktif' }}</UiLencana>
+          </td>
+          <td>{{ waktu(p.dibuat_pada) }}</td>
+          <td class="py-1 text-right whitespace-nowrap">
+            <UiTombol varian="polos" ukuran="kecil" @click="ubah(p)">Ubah</UiTombol>
+            <UiTombol v-if="p.id_pengguna !== auth.pengguna?.id_pengguna" varian="polos" ukuran="kecil" @click="ubahStatus(p)">
+              {{ p.aktif ? 'Nonaktifkan' : 'Aktifkan' }}
+            </UiTombol>
+          </td>
+        </tr>
+      </tbody>
+    </UiTabel>
 
     <DialogModal v-if="formulir" :judul="formulir.id ? 'Ubah pengguna' : 'Tambah pengguna'" @tutup="formulir = null">
-      <form class="form" @submit.prevent="simpan">
-        <p v-if="galatForm" class="pesan galat" role="alert">{{ galatForm }}</p>
-        <label class="isian">Nama <input v-model="formulir.nama" required autofocus /></label>
-        <label class="isian">
-          Nama pengguna
+      <form class="grid gap-3.5" @submit.prevent="simpan">
+        <UiPesan v-if="galatForm" jenis="galat">{{ galatForm }}</UiPesan>
+        <UiIsian label="Nama"><input v-model="formulir.nama" required autofocus /></UiIsian>
+        <UiIsian label="Nama pengguna">
           <input v-model="formulir.username" required :disabled="!!formulir.id" autocapitalize="none" autocomplete="off" />
-        </label>
-        <label class="isian">
-          Peran
+        </UiIsian>
+        <UiIsian label="Peran">
           <select v-model="formulir.peran" :disabled="formulir.id === auth.pengguna?.id_pengguna">
             <option value="kasir">Kasir</option>
             <option value="admin">Pemilik/Admin</option>
           </select>
-        </label>
-        <label class="isian">
-          {{ formulir.id ? 'Kata sandi baru' : 'Kata sandi' }}
-          <small>{{ formulir.id ? 'Kosongkan bila tidak direset. ' : '' }}Minimal 8 karakter.</small>
+        </UiIsian>
+        <UiIsian
+          :label="formulir.id ? 'Kata sandi baru' : 'Kata sandi'"
+          :petunjuk="`${formulir.id ? 'Kosongkan bila tidak direset. ' : ''}Minimal 8 karakter.`"
+        >
           <input v-model="formulir.kata_sandi" type="password" :required="!formulir.id" minlength="8" autocomplete="new-password" />
-        </label>
-        <button class="tombol" :disabled="memproses">Simpan</button>
+        </UiIsian>
+        <UiTombol :disabled="memproses">Simpan</UiTombol>
       </form>
     </DialogModal>
-  </div>
+  </UiHalaman>
 </template>
-
-<style scoped>
-.aksi {
-  white-space: nowrap;
-  padding-block: 4px;
-}
-.aksi .tombol {
-  min-height: 36px;
-}
-.form {
-  display: grid;
-  gap: 14px;
-}
-</style>

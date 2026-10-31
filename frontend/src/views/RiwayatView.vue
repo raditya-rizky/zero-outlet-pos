@@ -4,6 +4,13 @@ import { api, pesanError } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { hariIni, namaMetode, rupiah, waktu } from '@/format'
 import type { Pengguna, RingkasTransaksi } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
+import UiLencana from '@/components/ui/UiLencana.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTabel from '@/components/ui/UiTabel.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const auth = useAuth()
 const noFaktur = ref('')
@@ -39,72 +46,57 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="halaman">
-    <div class="kepala-halaman">
-      <div>
-        <h1>Riwayat transaksi</h1>
-        <p class="redup">{{ auth.isAdmin ? 'Semua transaksi toko.' : 'Transaksi yang Anda proses.' }} Buka struk untuk melihat rincian atau mencetak ulang.</p>
-      </div>
-    </div>
+  <UiHalaman>
+    <UiKepalaHalaman judul="Riwayat transaksi">
+      <template #deskripsi>
+        {{ auth.isAdmin ? 'Semua transaksi toko.' : 'Transaksi yang Anda proses.' }} Buka struk untuk melihat rincian atau mencetak ulang.
+      </template>
+    </UiKepalaHalaman>
 
-    <form class="saring" @submit.prevent="muat">
-      <label class="isian">No. faktur <input v-model="noFaktur" placeholder="mis. ZO-261024" /></label>
-      <label class="isian">Dari <input v-model="dari" type="date" /></label>
-      <label class="isian">Sampai <input v-model="sampai" type="date" /></label>
-      <label v-if="auth.isAdmin" class="isian">
-        Kasir
+    <form class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_160px]" @submit.prevent="muat">
+      <UiIsian label="No. faktur"><input v-model="noFaktur" placeholder="mis. ZO-261024" /></UiIsian>
+      <UiIsian label="Dari"><input v-model="dari" type="date" /></UiIsian>
+      <UiIsian label="Sampai"><input v-model="sampai" type="date" /></UiIsian>
+      <UiIsian v-if="auth.isAdmin" label="Kasir">
         <select v-model="idKasir">
           <option value="">Semua kasir</option>
           <option v-for="k in kasir" :key="k.id_pengguna" :value="k.id_pengguna">{{ k.nama }}</option>
         </select>
-      </label>
-      <button class="tombol" :disabled="memuat">Tampilkan</button>
+      </UiIsian>
+      <UiTombol :disabled="memuat">Tampilkan</UiTombol>
     </form>
 
-    <p v-if="galat" class="pesan galat">{{ galat }}</p>
+    <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-    <div class="tabel-bungkus">
-      <table>
-        <thead>
-          <tr>
-            <th>Waktu</th>
-            <th>No. faktur</th>
-            <th>Kasir</th>
-            <th class="kanan">Barang</th>
-            <th>Bayar</th>
-            <th class="kanan">Total</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="t in data" :key="t.id_transaksi">
-            <td>{{ waktu(t.tanggal_waktu) }}</td>
-            <td>
-              {{ t.no_faktur }}
-              <span v-if="t.status === 'batal'" class="lencana bahaya">Batal</span>
-            </td>
-            <td>{{ t.nama_kasir }}</td>
-            <td class="kanan angka">{{ t.jumlah_barang }}</td>
-            <td>{{ namaMetode[t.metode_bayar] }}</td>
-            <td class="kanan angka">{{ rupiah(t.total) }}</td>
-            <td class="kanan aksi">
-              <RouterLink :to="`/struk/${t.id_transaksi}`" class="tombol polos">Lihat</RouterLink>
-              <RouterLink :to="{ path: `/struk/${t.id_transaksi}`, query: { cetak_ulang: '1' } }" class="tombol polos">Cetak ulang</RouterLink>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-if="!memuat && !data.length" class="kosong">Belum ada transaksi pada rentang tanggal ini.</p>
-    </div>
-  </div>
+    <UiTabel :kosong="!memuat && !data.length ? 'Belum ada transaksi pada rentang tanggal ini.' : null">
+      <thead>
+        <tr>
+          <th>Waktu</th>
+          <th>No. faktur</th>
+          <th>Kasir</th>
+          <th class="text-right">Barang</th>
+          <th>Bayar</th>
+          <th class="text-right">Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="t in data" :key="t.id_transaksi">
+          <td>{{ waktu(t.tanggal_waktu) }}</td>
+          <td>
+            {{ t.no_faktur }}
+            <UiLencana v-if="t.status === 'batal'" warna="bahaya">Batal</UiLencana>
+          </td>
+          <td>{{ t.nama_kasir }}</td>
+          <td class="text-right tabular-nums">{{ t.jumlah_barang }}</td>
+          <td>{{ namaMetode[t.metode_bayar] }}</td>
+          <td class="text-right tabular-nums">{{ rupiah(t.total) }}</td>
+          <td class="py-1 text-right whitespace-nowrap">
+            <UiTombol :to="`/struk/${t.id_transaksi}`" varian="polos" ukuran="kecil">Lihat</UiTombol>
+            <UiTombol :to="{ path: `/struk/${t.id_transaksi}`, query: { cetak_ulang: '1' } }" varian="polos" ukuran="kecil">Cetak ulang</UiTombol>
+          </td>
+        </tr>
+      </tbody>
+    </UiTabel>
+  </UiHalaman>
 </template>
-
-<style scoped>
-.aksi {
-  white-space: nowrap;
-  padding-block: 4px;
-}
-.aksi .tombol {
-  min-height: 36px;
-}
-</style>

@@ -1,318 +1,160 @@
+@import 'tailwindcss';
+
 /*
- * Token visual Kasir Zero Outlet.
- * Indigo denim untuk kerangka, putih kebiruan untuk area kerja, dan kuning
- * label harga khusus untuk angka total belanja.
+ * Token visual Kasir Zero Outlet. Palet bawaan Tailwind dimatikan agar hanya
+ * warna toko yang bisa dipakai: indigo denim untuk kerangka, putih kebiruan
+ * untuk area kerja, dan kuning label harga khusus untuk angka total belanja.
  */
-:root {
-  --indigo: #1c2a52;
-  --indigo-2: #2a3c6e;
-  --denim: #2f4f94;
-  --denim-terang: #e6ecf8;
-  --tag: #f2c230;
-  --tag-gelap: #8a6a00;
-  --kertas: #f4f6fa;
-  --putih: #ffffff;
-  --garis: #d8deea;
-  --garis-kuat: #b9c2d6;
-  --tinta: #172036;
-  --redup: #5b6681;
-  --bahaya: #b8402a;
-  --bahaya-terang: #fbebe7;
-  --aman: #2e7650;
-  --aman-terang: #e5f3eb;
-  --waspada: #9a6400;
-  --waspada-terang: #fdf3dc;
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-indigo: #1c2a52;
+  --color-indigo-2: #2a3c6e;
+  --color-indigo-pudar: #c9d3ec;
+  --color-indigo-samar: #aab6d4;
+  --color-denim: #2f4f94;
+  --color-denim-terang: #e6ecf8;
+  --color-tag: #f2c230;
+  --color-tag-gelap: #8a6a00;
+  --color-kertas: #f4f6fa;
+  --color-garis: #d8deea;
+  --color-garis-kuat: #b9c2d6;
+  --color-tinta: #172036;
+  --color-redup: #5b6681;
+  --color-bahaya: #b8402a;
+  --color-bahaya-terang: #fbebe7;
+  --color-bahaya-gelap: #7a2414;
+  --color-aman: #2e7650;
+  --color-aman-terang: #e5f3eb;
+  --color-aman-gelap: #1c4d33;
+  --color-waspada: #9a6400;
+  --color-waspada-terang: #fdf3dc;
+  --color-waspada-gelap: #5e3d00;
 
-  --font: 'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --r-kecil: 6px;
-  --r: 10px;
-  --bayang: 0 1px 2px rgb(23 32 54 / 0.06), 0 4px 16px rgb(23 32 54 / 0.06);
-  --fokus: 0 0 0 3px rgb(47 79 148 / 0.35);
+  --font-sans: 'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-struk: 'Courier New', ui-monospace, monospace;
 
-  color-scheme: light;
-  font-family: var(--font);
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--tinta);
-  background: var(--kertas);
-  -webkit-font-smoothing: antialiased;
-}
+  --radius-kecil: 6px;
+  --radius-sedang: 10px;
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+  --shadow-kartu: 0 1px 2px rgb(23 32 54 / 0.06), 0 4px 16px rgb(23 32 54 / 0.06);
+  --shadow-dialog: 0 20px 60px rgb(23 32 54 / 0.3);
+  --shadow-login: 0 24px 60px rgb(0 0 0 / 0.25);
+  --shadow-fokus: 0 0 0 3px rgb(47 79 148 / 0.35);
 }
 
-body {
-  margin: 0;
-  min-height: 100dvh;
-  background: var(--kertas);
+/* Bawaan elemen: judul, kontrol formulir, dan tabel data. */
+@layer base {
+  html {
+    color-scheme: light;
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    color: var(--color-tinta);
+    background: var(--color-kertas);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--color-kertas);
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+    font-stretch: 112%;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    font-size: 1.6rem;
+  }
+  h2 {
+    font-size: 1.2rem;
+  }
+  h3 {
+    font-size: 1rem;
+  }
+
+  a {
+    color: var(--color-denim);
+  }
+
+  input:not([type='checkbox'], [type='radio']),
+  select,
+  textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-garis-kuat);
+    border-radius: var(--radius-kecil);
+    background: var(--color-white);
+  }
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    border-color: var(--color-denim);
+    box-shadow: var(--shadow-fokus);
+  }
+  input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-denim);
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  button:focus-visible,
+  a:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-fokus);
+  }
+
+  th,
+  td {
+    padding: 10px 14px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-garis);
+  }
+  th {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--color-redup);
+    background: var(--color-kertas);
+  }
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
 }
 
-h1,
-h2,
-h3 {
-  margin: 0;
-  line-height: 1.2;
-  font-stretch: 112%;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-h1 {
-  font-size: 1.6rem;
-}
-h2 {
-  font-size: 1.2rem;
-}
-h3 {
-  font-size: 1rem;
-}
-p {
-  margin: 0;
-}
-
-.angka {
-  font-variant-numeric: tabular-nums;
-}
-.redup {
-  color: var(--redup);
-}
-.kecil {
-  font-size: 0.875rem;
-}
-
-a {
-  color: var(--denim);
-}
-
-/* ---------- Kontrol formulir ---------- */
-label.isian {
-  display: grid;
-  gap: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-label.isian > small {
-  font-weight: 400;
-  color: var(--redup);
-}
-
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 12px;
-  border: 1px solid var(--garis-kuat);
-  border-radius: var(--r-kecil);
-  background: var(--putih);
-}
-textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: none;
-  border-color: var(--denim);
-  box-shadow: var(--fokus);
-}
-input[type='checkbox'] {
-  width: 20px;
-  min-height: 20px;
-  accent-color: var(--denim);
-}
-
-button {
-  font: inherit;
-  cursor: pointer;
-}
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-button:focus-visible,
-a:focus-visible {
-  outline: none;
-  box-shadow: var(--fokus);
-}
-
-.tombol {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 8px 18px;
-  border: 1px solid transparent;
-  border-radius: var(--r-kecil);
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  background: var(--denim);
-  color: var(--putih);
-}
-.tombol:hover:not(:disabled) {
-  background: var(--indigo-2);
-}
-.tombol.kedua {
-  background: var(--putih);
-  color: var(--tinta);
-  border-color: var(--garis-kuat);
-}
-.tombol.kedua:hover:not(:disabled) {
-  background: var(--denim-terang);
-}
-.tombol.bahaya {
-  background: var(--putih);
-  color: var(--bahaya);
-  border-color: currentColor;
-}
-.tombol.bahaya:hover:not(:disabled) {
-  background: var(--bahaya-terang);
-}
-.tombol.besar {
-  min-height: 56px;
-  font-size: 1.1rem;
-}
-.tombol.polos {
-  background: transparent;
-  color: var(--denim);
-  padding-inline: 8px;
-}
-.tombol.polos:hover:not(:disabled) {
-  background: var(--denim-terang);
-}
-
-/* ---------- Pesan ---------- */
-.pesan {
-  padding: 10px 14px;
-  border-radius: var(--r-kecil);
-  border-left: 4px solid;
-  font-size: 0.95rem;
-}
-.pesan.galat {
-  background: var(--bahaya-terang);
-  border-color: var(--bahaya);
-  color: #7a2414;
-}
-.pesan.berhasil {
-  background: var(--aman-terang);
-  border-color: var(--aman);
-  color: #1c4d33;
-}
-.pesan.info {
-  background: var(--waspada-terang);
-  border-color: var(--waspada);
-  color: #5e3d00;
-}
-
-/* ---------- Halaman administrasi ---------- */
-.halaman {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
-  display: grid;
-  gap: 20px;
-}
-.kepala-halaman {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 12px;
-}
-.saring {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: end;
-}
-.saring > * {
-  flex: 1 1 160px;
-}
-.saring > .tombol {
-  flex: 0 0 auto;
-}
-
-.panel {
-  background: var(--putih);
-  border: 1px solid var(--garis);
-  border-radius: var(--r);
-}
-
-.tabel-bungkus {
-  overflow-x: auto;
-  background: var(--putih);
-  border: 1px solid var(--garis);
-  border-radius: var(--r);
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-}
-th,
-td {
-  padding: 10px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--garis);
-  vertical-align: top;
-}
-th {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--redup);
-  background: var(--kertas);
-  white-space: nowrap;
-}
-tbody tr:last-child td {
-  border-bottom: 0;
-}
-td.kanan,
-th.kanan {
-  text-align: right;
-}
-
-.lencana {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  background: var(--denim-terang);
-  color: var(--denim);
-  white-space: nowrap;
-}
-.lencana.aman {
-  background: var(--aman-terang);
-  color: var(--aman);
-}
-.lencana.bahaya {
-  background: var(--bahaya-terang);
-  color: var(--bahaya);
-}
-.lencana.waspada {
-  background: var(--waspada-terang);
-  color: var(--waspada);
-}
-.lencana.netral {
-  background: var(--kertas);
-  color: var(--redup);
-}
-
-.kosong {
-  padding: 40px 16px;
-  text-align: center;
-  color: var(--redup);
+/* Struk dicetak pada kertas thermal 58 mm (KF-09). */
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+  body {
+    background: #fff;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
     animation: none !important;
   }

@@ -3,6 +3,13 @@ import { onMounted, ref } from 'vue'
 import { api, pesanError } from '@/api'
 import { hariIni, rupiah, waktu } from '@/format'
 import type { Pengguna, Sesi } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
+import UiLencana from '@/components/ui/UiLencana.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTabel from '@/components/ui/UiTabel.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const d = new Date()
 d.setDate(d.getDate() - 6)
@@ -22,7 +29,7 @@ async function muat() {
   }
 }
 
-function kelasSelisih(n: number | null) {
+function kelasSelisih(n: number | null): 'netral' | 'aman' | 'bahaya' {
   return n === null ? 'netral' : n === 0 ? 'aman' : 'bahaya'
 }
 
@@ -33,62 +40,57 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="halaman">
-    <div>
-      <h1>Sesi kasir</h1>
-      <p class="redup">Rekonsiliasi kas setiap shift. Tinjau sesi dengan selisih beserta alasannya.</p>
-    </div>
+  <UiHalaman>
+    <UiKepalaHalaman judul="Sesi kasir">
+      <template #deskripsi>Rekonsiliasi kas setiap shift. Tinjau sesi dengan selisih beserta alasannya.</template>
+    </UiKepalaHalaman>
 
-    <form class="saring" @submit.prevent="muat">
-      <label class="isian">Dari <input v-model="dari" type="date" /></label>
-      <label class="isian">Sampai <input v-model="sampai" type="date" /></label>
-      <label class="isian">
-        Kasir
+    <form class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_160px]" @submit.prevent="muat">
+      <UiIsian label="Dari"><input v-model="dari" type="date" /></UiIsian>
+      <UiIsian label="Sampai"><input v-model="sampai" type="date" /></UiIsian>
+      <UiIsian label="Kasir">
         <select v-model="idKasir">
           <option value="">Semua kasir</option>
           <option v-for="k in kasir" :key="k.id_pengguna" :value="k.id_pengguna">{{ k.nama }}</option>
         </select>
-      </label>
-      <button class="tombol">Tampilkan</button>
+      </UiIsian>
+      <UiTombol>Tampilkan</UiTombol>
     </form>
 
-    <p v-if="galat" class="pesan galat">{{ galat }}</p>
+    <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-    <div class="tabel-bungkus">
-      <table>
-        <thead>
-          <tr>
-            <th>Kasir</th>
-            <th>Dibuka</th>
-            <th>Ditutup</th>
-            <th class="kanan">Modal awal</th>
-            <th class="kanan">Kas seharusnya</th>
-            <th class="kanan">Kas fisik</th>
-            <th>Selisih</th>
-            <th>Alasan</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="s in data" :key="s.id_sesi">
-            <td>{{ s.nama_kasir }}</td>
-            <td>{{ waktu(s.waktu_buka) }}</td>
-            <td>
-              <span v-if="s.waktu_tutup">{{ waktu(s.waktu_tutup) }}</span>
-              <span v-else class="lencana">Masih dibuka</span>
-            </td>
-            <td class="kanan angka">{{ rupiah(s.modal_awal) }}</td>
-            <td class="kanan angka">{{ s.kas_seharusnya === null ? '' : rupiah(s.kas_seharusnya) }}</td>
-            <td class="kanan angka">{{ s.kas_fisik === null ? '' : rupiah(s.kas_fisik) }}</td>
-            <td>
-              <span v-if="s.selisih !== null" class="lencana angka" :class="kelasSelisih(s.selisih)">
-                {{ s.selisih === 0 ? 'Sesuai' : (s.selisih > 0 ? '+' : '−') + rupiah(Math.abs(s.selisih)) }}
-              </span>
-            </td>
-            <td>{{ s.alasan_selisih }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-if="!data.length" class="kosong">Tidak ada sesi kasir pada rentang tanggal ini.</p>
-    </div>
-  </div>
+    <UiTabel :kosong="!data.length ? 'Tidak ada sesi kasir pada rentang tanggal ini.' : null">
+      <thead>
+        <tr>
+          <th>Kasir</th>
+          <th>Dibuka</th>
+          <th>Ditutup</th>
+          <th class="text-right">Modal awal</th>
+          <th class="text-right">Kas seharusnya</th>
+          <th class="text-right">Kas fisik</th>
+          <th>Selisih</th>
+          <th>Alasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="s in data" :key="s.id_sesi">
+          <td>{{ s.nama_kasir }}</td>
+          <td>{{ waktu(s.waktu_buka) }}</td>
+          <td>
+            <span v-if="s.waktu_tutup">{{ waktu(s.waktu_tutup) }}</span>
+            <UiLencana v-else>Masih dibuka</UiLencana>
+          </td>
+          <td class="text-right tabular-nums">{{ rupiah(s.modal_awal) }}</td>
+          <td class="text-right tabular-nums">{{ s.kas_seharusnya === null ? '' : rupiah(s.kas_seharusnya) }}</td>
+          <td class="text-right tabular-nums">{{ s.kas_fisik === null ? '' : rupiah(s.kas_fisik) }}</td>
+          <td>
+            <UiLencana v-if="s.selisih !== null" :warna="kelasSelisih(s.selisih)" class="tabular-nums">
+              {{ s.selisih === 0 ? 'Sesuai' : (s.selisih > 0 ? '+' : '−') + rupiah(Math.abs(s.selisih)) }}
+            </UiLencana>
+          </td>
+          <td>{{ s.alasan_selisih }}</td>
+        </tr>
+      </tbody>
+    </UiTabel>
+  </UiHalaman>
 </template>

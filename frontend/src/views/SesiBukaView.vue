@@ -5,6 +5,10 @@ import { useSesi } from '@/stores/sesi'
 import { useAuth } from '@/stores/auth'
 import { pesanError } from '@/api'
 import { parseRupiah, ribuan, rupiah } from '@/format'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const sesi = useSesi()
 const auth = useAuth()
@@ -40,72 +44,36 @@ async function buka() {
 </script>
 
 <template>
-  <div class="halaman sempit">
-    <form class="panel isi" @submit.prevent="buka">
+  <UiHalaman ukuran="sempit">
+    <form class="grid gap-[18px] rounded-sedang border border-garis bg-white p-6" @submit.prevent="buka">
       <div>
         <h1>Buka sesi kasir</h1>
-        <p class="redup">Hitung uang di laci kas sebelum mulai melayani. Jumlah ini menjadi modal awal sesi.</p>
+        <p class="mt-1.5 text-redup">Hitung uang di laci kas sebelum mulai melayani. Jumlah ini menjadi modal awal sesi.</p>
       </div>
 
-      <p v-if="galat" class="pesan galat" role="alert">{{ galat }}</p>
+      <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-      <label class="isian">
-        Modal awal di laci kas
-        <div class="rupiah">
-          <span>Rp</span>
-          <input v-model="modal" inputmode="numeric" placeholder="0" autofocus class="angka" @blur="rapikan" />
+      <UiIsian label="Modal awal di laci kas">
+        <div class="flex items-center rounded-kecil border border-garis-kuat bg-white focus-within:border-denim focus-within:shadow-fokus">
+          <span class="pl-3.5 font-bold text-redup">Rp</span>
+          <input
+            v-model="modal"
+            inputmode="numeric"
+            placeholder="0"
+            autofocus
+            class="min-h-14 border-0 text-2xl font-bold tabular-nums focus-visible:shadow-none"
+            @blur="rapikan"
+          />
         </div>
-      </label>
-      <div class="cepat">
-        <button v-for="n in pilihanModal" :key="n" type="button" class="tombol kedua" @click="modal = ribuan(n)">
+      </UiIsian>
+      <div class="grid grid-cols-[repeat(auto-fit,minmax(110px,1fr))] gap-2">
+        <UiTombol v-for="n in pilihanModal" :key="n" type="button" varian="kedua" @click="modal = ribuan(n)">
           {{ rupiah(n) }}
-        </button>
+        </UiTombol>
       </div>
 
-      <button class="tombol besar" :disabled="memproses">Buka sesi</button>
-      <RouterLink v-if="auth.isAdmin" to="/admin/produk" class="kecil">Kelola toko tanpa membuka sesi</RouterLink>
+      <UiTombol ukuran="besar" :disabled="memproses">Buka sesi</UiTombol>
+      <RouterLink v-if="auth.isAdmin" to="/admin/produk" class="text-sm">Kelola toko tanpa membuka sesi</RouterLink>
     </form>
-  </div>
+  </UiHalaman>
 </template>
-
-<style scoped>
-.sempit {
-  max-width: 520px;
-}
-.isi {
-  display: grid;
-  gap: 18px;
-  padding: 24px;
-}
-.isi p.redup {
-  margin-top: 6px;
-}
-.rupiah {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--garis-kuat);
-  border-radius: var(--r-kecil);
-  background: var(--putih);
-}
-.rupiah:focus-within {
-  border-color: var(--denim);
-  box-shadow: var(--fokus);
-}
-.rupiah span {
-  padding-left: 14px;
-  font-weight: 700;
-  color: var(--redup);
-}
-.rupiah input {
-  border: 0;
-  box-shadow: none;
-  font-size: 1.5rem;
-  font-weight: 700;
-  min-height: 56px;
-}
-.cepat {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-}
-</style>

@@ -7,97 +7,41 @@ defineProps<{ struk: Struk }>()
 </script>
 
 <template>
-  <article class="struk angka">
-    <header>
-      <strong>{{ struk.toko.nama }}</strong>
+  <article class="w-[58mm] bg-white px-[5mm] py-[4mm] font-struk text-[11px] leading-[1.35] text-black tabular-nums">
+    <header class="grid gap-0.5 text-center">
+      <strong class="text-[14px]">{{ struk.toko.nama }}</strong>
       <span>{{ struk.toko.alamat }}</span>
     </header>
-    <p v-if="struk.cetak_ulang" class="ulang">*** CETAK ULANG ***</p>
-    <p v-if="struk.status === 'batal'" class="ulang">*** DIBATALKAN ***</p>
+    <p v-if="struk.cetak_ulang" class="mt-1.5 text-center font-bold">*** CETAK ULANG ***</p>
+    <p v-if="struk.status === 'batal'" class="mt-1.5 text-center font-bold">*** DIBATALKAN ***</p>
 
-    <dl class="meta">
-      <div><dt>No</dt><dd>{{ struk.no_faktur }}</dd></div>
-      <div><dt>Tgl</dt><dd>{{ waktu(struk.tanggal_waktu) }}</dd></div>
-      <div><dt>Kasir</dt><dd>{{ struk.nama_kasir }}</dd></div>
+    <dl class="mt-2">
+      <div class="flex gap-1.5"><dt class="w-[34px] flex-none">No</dt><dd>{{ struk.no_faktur }}</dd></div>
+      <div class="flex gap-1.5"><dt class="w-[34px] flex-none">Tgl</dt><dd>{{ waktu(struk.tanggal_waktu) }}</dd></div>
+      <div class="flex gap-1.5"><dt class="w-[34px] flex-none">Kasir</dt><dd>{{ struk.nama_kasir }}</dd></div>
     </dl>
 
-    <hr />
-    <div v-for="item in struk.items" :key="item.id_detail" class="baris">
-      <div>{{ item.nama_barang }}</div>
-      <div class="rinci">
-        <span>{{ item.jumlah }} x {{ ribuan(item.harga_satuan) }}</span>
-        <span>{{ ribuan(item.subtotal) }}</span>
+    <hr class="my-1.5 border-dashed border-black" />
+    <div class="grid gap-1">
+      <div v-for="item in struk.items" :key="item.id_detail">
+        <div>{{ item.nama_barang }}</div>
+        <div class="flex justify-between gap-2">
+          <span>{{ item.jumlah }} x {{ ribuan(item.harga_satuan) }}</span>
+          <span>{{ ribuan(item.subtotal) }}</span>
+        </div>
       </div>
     </div>
-    <hr />
+    <hr class="my-1.5 border-dashed border-black" />
 
-    <div class="rinci"><span>Subtotal</span><span>{{ ribuan(struk.subtotal) }}</span></div>
-    <div v-if="struk.diskon" class="rinci"><span>Diskon</span><span>-{{ ribuan(struk.diskon) }}</span></div>
-    <div class="rinci total"><span>TOTAL</span><span>{{ ribuan(struk.total) }}</span></div>
-    <div class="rinci"><span>{{ namaMetode[struk.metode_bayar] }}</span><span>{{ ribuan(struk.bayar) }}</span></div>
-    <div v-if="struk.metode_bayar === 'tunai'" class="rinci"><span>Kembali</span><span>{{ ribuan(struk.kembalian) }}</span></div>
+    <div class="flex justify-between gap-2"><span>Subtotal</span><span>{{ ribuan(struk.subtotal) }}</span></div>
+    <div v-if="struk.diskon" class="flex justify-between gap-2"><span>Diskon</span><span>-{{ ribuan(struk.diskon) }}</span></div>
+    <div class="my-0.5 flex justify-between gap-2 text-[13px] font-bold"><span>TOTAL</span><span>{{ ribuan(struk.total) }}</span></div>
+    <div class="flex justify-between gap-2"><span>{{ namaMetode[struk.metode_bayar] }}</span><span>{{ ribuan(struk.bayar) }}</span></div>
+    <div v-if="struk.metode_bayar === 'tunai'" class="flex justify-between gap-2">
+      <span>Kembali</span><span>{{ ribuan(struk.kembalian) }}</span>
+    </div>
 
-    <hr />
-    <footer>{{ struk.toko.catatan }}</footer>
+    <hr class="my-1.5 border-dashed border-black" />
+    <footer class="text-center">{{ struk.toko.catatan }}</footer>
   </article>
 </template>
-
-<style scoped>
-.struk {
-  width: 58mm;
-  padding: 4mm 5mm;
-  background: var(--putih);
-  color: #000;
-  font-family: 'Courier New', ui-monospace, monospace;
-  font-size: 11px;
-  line-height: 1.35;
-}
-header {
-  display: grid;
-  text-align: center;
-  gap: 2px;
-}
-header strong {
-  font-size: 14px;
-}
-.ulang {
-  margin-top: 6px;
-  text-align: center;
-  font-weight: 700;
-}
-.meta {
-  margin: 8px 0 0;
-}
-.meta div {
-  display: flex;
-  gap: 6px;
-}
-.meta dt {
-  width: 34px;
-  flex: none;
-}
-.meta dd {
-  margin: 0;
-}
-hr {
-  border: 0;
-  border-top: 1px dashed #000;
-  margin: 6px 0;
-}
-.baris + .baris {
-  margin-top: 4px;
-}
-.rinci {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-.total {
-  font-weight: 700;
-  font-size: 13px;
-  margin: 2px 0;
-}
-footer {
-  text-align: center;
-}
-</style>

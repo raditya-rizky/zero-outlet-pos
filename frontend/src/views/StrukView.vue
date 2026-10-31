@@ -5,6 +5,10 @@ import { api, pesanError } from '@/api'
 import KertasStruk from '@/components/KertasStruk.vue'
 import { rupiah } from '@/format'
 import type { Struk } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const props = defineProps<{ id: string }>()
 const route = useRoute()
@@ -12,7 +16,7 @@ const router = useRouter()
 
 const struk = ref<Struk | null>(null)
 const galat = ref<string | null>(null)
-const tombolCetak = ref<HTMLButtonElement>()
+const tombolCetak = ref<{ $el: HTMLElement }>()
 const baru = route.query.baru === '1'
 
 onMounted(async () => {
@@ -22,7 +26,7 @@ onMounted(async () => {
     // Hapus penanda dari URL agar memuat ulang halaman tidak menambah hitungan cetak.
     if (cetakUlang) router.replace({ query: { ...route.query, cetak_ulang: undefined } })
     await nextTick()
-    tombolCetak.value?.focus()
+    tombolCetak.value?.$el.focus()
   } catch (e) {
     galat.value = pesanError(e)
   }
@@ -34,81 +38,27 @@ function cetak() {
 </script>
 
 <template>
-  <div class="halaman struk-halaman">
-    <p v-if="galat" class="pesan galat">{{ galat }}</p>
+  <UiHalaman ukuran="lebar" class="print:m-0 print:p-0">
+    <UiPesan v-if="galat" jenis="galat" class="print:hidden">{{ galat }}</UiPesan>
 
     <template v-if="struk">
-      <div class="kepala-halaman tanpa-cetak">
-        <div>
-          <h1>{{ baru ? 'Transaksi tersimpan' : 'Struk transaksi' }}</h1>
-          <p class="redup">
-            {{ struk.no_faktur }}<template v-if="baru && struk.metode_bayar === 'tunai'">. Berikan kembalian {{ rupiah(struk.kembalian) }} kepada pelanggan.</template>
-          </p>
-        </div>
-      </div>
+      <UiKepalaHalaman :judul="baru ? 'Transaksi tersimpan' : 'Struk transaksi'" class="print:hidden">
+        <template #deskripsi>
+          {{ struk.no_faktur }}<template v-if="baru && struk.metode_bayar === 'tunai'">. Berikan kembalian {{ rupiah(struk.kembalian) }} kepada pelanggan.</template>
+        </template>
+      </UiKepalaHalaman>
 
-      <div class="tata">
-        <div class="area-cetak">
-          <KertasStruk :struk="struk" />
+      <div class="flex flex-wrap items-start gap-6">
+        <div class="rounded-sedang bg-garis p-4 print:bg-transparent print:p-0">
+          <KertasStruk :struk="struk" class="shadow-kartu print:shadow-none" />
         </div>
-        <div class="aksi tanpa-cetak">
-          <button ref="tombolCetak" class="tombol besar" @click="cetak">Cetak struk</button>
-          <RouterLink v-if="baru" to="/kasir" class="tombol kedua besar">Transaksi baru</RouterLink>
-          <RouterLink v-else to="/riwayat" class="tombol kedua">Kembali ke riwayat</RouterLink>
-          <p class="kecil redup">Tanpa printer thermal, pilih “Simpan sebagai PDF” pada jendela cetak.</p>
+        <div class="grid flex-[1_1_220px] gap-2.5 print:hidden">
+          <UiTombol ref="tombolCetak" ukuran="besar" @click="cetak">Cetak struk</UiTombol>
+          <UiTombol v-if="baru" to="/kasir" varian="kedua" ukuran="besar">Transaksi baru</UiTombol>
+          <UiTombol v-else to="/riwayat" varian="kedua">Kembali ke riwayat</UiTombol>
+          <p class="text-sm text-redup">Tanpa printer thermal, pilih “Simpan sebagai PDF” pada jendela cetak.</p>
         </div>
       </div>
     </template>
-  </div>
+  </UiHalaman>
 </template>
-
-<style scoped>
-.struk-halaman {
-  max-width: 760px;
-}
-.tata {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  align-items: start;
-}
-.area-cetak {
-  padding: 16px;
-  background: var(--garis);
-  border-radius: var(--r);
-}
-.area-cetak :deep(.struk) {
-  box-shadow: var(--bayang);
-}
-.aksi {
-  display: grid;
-  gap: 10px;
-  flex: 1 1 220px;
-}
-</style>
-
-<style>
-@media print {
-  @page {
-    size: 58mm auto;
-    margin: 0;
-  }
-  body {
-    background: #fff;
-  }
-  .tanpa-cetak {
-    display: none !important;
-  }
-  .struk-halaman {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  .struk-halaman .area-cetak {
-    padding: 0;
-    background: none;
-  }
-  .struk-halaman .struk {
-    box-shadow: none !important;
-  }
-}
-</style>

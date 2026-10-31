@@ -4,6 +4,12 @@ import { useRouter } from 'vue-router'
 import { api, pesanError } from '@/api'
 import { parseRupiah, ribuan } from '@/format'
 import type { Kategori, Produk } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTabel from '@/components/ui/UiTabel.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const props = defineProps<{ id?: string }>()
 const router = useRouter()
@@ -136,158 +142,102 @@ onMounted(async () => {
 </script>
 
 <template>
-  <form class="halaman" @submit.prevent="simpan">
-    <div class="kepala-halaman">
-      <div>
-        <RouterLink to="/admin/produk" class="kecil">Kembali ke daftar produk</RouterLink>
-        <h1>{{ ubah ? `Ubah ${nama || 'produk'}` : 'Produk baru' }}</h1>
-      </div>
-      <div class="tombol-baris">
-        <button v-if="ubah" type="button" class="tombol bahaya" @click="hapus">Hapus</button>
-        <button class="tombol" :disabled="memproses">Simpan produk</button>
-      </div>
-    </div>
+  <UiHalaman as="form" @submit.prevent="simpan">
+    <UiKepalaHalaman :judul="ubah ? `Ubah ${nama || 'produk'}` : 'Produk baru'">
+      <template #atas><RouterLink to="/admin/produk" class="text-sm">Kembali ke daftar produk</RouterLink></template>
+      <template #aksi>
+        <UiTombol v-if="ubah" type="button" varian="bahaya" @click="hapus">Hapus</UiTombol>
+        <UiTombol :disabled="memproses">Simpan produk</UiTombol>
+      </template>
+    </UiKepalaHalaman>
 
-    <p v-if="galat" class="pesan galat" role="alert">{{ galat }}</p>
+    <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-    <section class="panel bagian">
+    <section class="grid gap-4 rounded-sedang border border-garis bg-white p-5">
       <h2>Data produk</h2>
-      <div class="kisi">
-        <label class="isian">Kode produk <input v-model="kode" required placeholder="mis. KMJ-FLN" /></label>
-        <label class="isian lebar">Nama produk <input v-model="nama" required placeholder="mis. Kemeja Flanel Kotak" /></label>
-        <label class="isian">
-          Kategori
+      <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] items-end gap-4">
+        <UiIsian label="Kode produk"><input v-model="kode" required placeholder="mis. KMJ-FLN" /></UiIsian>
+        <UiIsian label="Nama produk" class="sm:col-span-2"><input v-model="nama" required placeholder="mis. Kemeja Flanel Kotak" /></UiIsian>
+        <UiIsian label="Kategori">
           <select v-model="idKategori" required>
             <option value="" disabled>Pilih kategori</option>
             <option v-for="k in kategori" :key="k.id_kategori" :value="k.id_kategori">{{ k.nama_kategori }}</option>
           </select>
-        </label>
-        <div class="isian kategori-baru">
-          <label class="isian">Atau kategori baru <input v-model="kategoriBaru" placeholder="mis. Batik" /></label>
-          <button type="button" class="tombol kedua" :disabled="!kategoriBaru.trim()" @click="tambahKategori">Tambah</button>
+        </UiIsian>
+        <div class="flex items-end gap-2">
+          <UiIsian label="Atau kategori baru" class="flex-1"><input v-model="kategoriBaru" placeholder="mis. Batik" /></UiIsian>
+          <UiTombol type="button" varian="kedua" :disabled="!kategoriBaru.trim()" @click="tambahKategori">Tambah</UiTombol>
         </div>
-        <label class="isian">Harga beli (Rp) <input v-model="hargaBeli" inputmode="numeric" required class="angka" @blur="hargaBeli = rapikan(hargaBeli)" /></label>
-        <label class="isian">Harga jual (Rp) <input v-model="hargaJual" inputmode="numeric" required class="angka" @blur="hargaJual = rapikan(hargaJual)" /></label>
-        <label class="centang"><input v-model="aktif" type="checkbox" /> Dijual di kasir</label>
+        <UiIsian label="Harga beli (Rp)">
+          <input v-model="hargaBeli" inputmode="numeric" required class="tabular-nums" @blur="hargaBeli = rapikan(hargaBeli)" />
+        </UiIsian>
+        <UiIsian label="Harga jual (Rp)">
+          <input v-model="hargaJual" inputmode="numeric" required class="tabular-nums" @blur="hargaJual = rapikan(hargaJual)" />
+        </UiIsian>
+        <label class="flex min-h-11 items-center gap-2 font-semibold"><input v-model="aktif" type="checkbox" /> Dijual di kasir</label>
       </div>
     </section>
 
-    <section class="panel bagian">
-      <div class="kepala-halaman">
-        <div>
-          <h2>Varian ukuran dan warna</h2>
-          <p class="redup kecil">SKU dibuat otomatis dari kode, ukuran, dan warna bila dikosongkan. Isi SKU bila barang sudah memiliki barcode.</p>
-        </div>
-      </div>
-
-      <div class="kombinasi">
-        <label class="isian">Ukuran <small>Pisahkan dengan koma</small><input v-model="daftarUkuran" placeholder="S, M, L, XL" /></label>
-        <label class="isian">Warna <small>Pisahkan dengan koma</small><input v-model="daftarWarna" placeholder="Hitam, Putih, Navy" /></label>
-        <button type="button" class="tombol kedua" :disabled="!daftarWarna.trim() || !daftarUkuran.trim()" @click="buatKombinasi">
-          Buat kombinasi
-        </button>
-      </div>
-
-      <div class="tabel-bungkus">
-        <table>
-          <thead>
-            <tr>
-              <th>Ukuran</th>
-              <th>Warna</th>
-              <th>SKU / barcode</th>
-              <th class="kanan">Stok</th>
-              <th class="kanan">Stok minimum</th>
-              <th>Dijual</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(v, i) in varian" :key="v.id_varian ?? `baru-${i}`" :class="{ mati: !v.aktif }">
-              <td><input v-model="v.ukuran" required aria-label="Ukuran" class="pendek" /></td>
-              <td><input v-model="v.warna" required aria-label="Warna" /></td>
-              <td><input v-model="v.sku" placeholder="Otomatis" aria-label="SKU" /></td>
-              <td class="kanan">
-                <span v-if="v.id_varian" class="angka">{{ v.stok }}</span>
-                <input v-else v-model.number="v.stok_awal" type="number" min="0" aria-label="Stok awal" class="pendek angka" title="Stok awal" />
-              </td>
-              <td class="kanan"><input v-model.number="v.stok_minimum" type="number" min="0" aria-label="Stok minimum" class="pendek angka" /></td>
-              <td><input v-model="v.aktif" type="checkbox" aria-label="Dijual" /></td>
-              <td>
-                <button v-if="!v.id_varian" type="button" class="tombol polos" @click="hapusBaris(i)">Hapus</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <p v-if="!varian.length" class="kosong">Isi daftar ukuran dan warna di atas lalu pilih Buat kombinasi.</p>
-      </div>
+    <section class="grid gap-4 rounded-sedang border border-garis bg-white p-5">
       <div>
-        <button type="button" class="tombol polos" @click="tambahBaris">Tambah satu varian</button>
+        <h2>Varian ukuran dan warna</h2>
+        <p class="text-sm text-redup">SKU dibuat otomatis dari kode, ukuran, dan warna bila dikosongkan. Isi SKU bila barang sudah memiliki barcode.</p>
       </div>
-      <p v-if="ubah" class="kecil redup">
+
+      <div class="grid items-end gap-3 sm:grid-cols-[1fr_1fr_auto]">
+        <UiIsian label="Ukuran" petunjuk="Pisahkan dengan koma"><input v-model="daftarUkuran" placeholder="S, M, L, XL" /></UiIsian>
+        <UiIsian label="Warna" petunjuk="Pisahkan dengan koma"><input v-model="daftarWarna" placeholder="Hitam, Putih, Navy" /></UiIsian>
+        <UiTombol type="button" varian="kedua" :disabled="!daftarWarna.trim() || !daftarUkuran.trim()" @click="buatKombinasi">
+          Buat kombinasi
+        </UiTombol>
+      </div>
+
+      <UiTabel :kosong="!varian.length ? 'Isi daftar ukuran dan warna di atas lalu pilih Buat kombinasi.' : null" class="[&_td_input]:min-h-[38px] [&_td_input]:px-2 [&_td_input]:py-1.5">
+        <thead>
+          <tr>
+            <th>Ukuran</th>
+            <th>Warna</th>
+            <th>SKU / barcode</th>
+            <th class="text-right">Stok</th>
+            <th class="text-right">Stok minimum</th>
+            <th>Dijual</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(v, i) in varian" :key="v.id_varian ?? `baru-${i}`" :class="{ '[&>td]:bg-kertas [&>td]:text-redup': !v.aktif }">
+            <td><input v-model="v.ukuran" required aria-label="Ukuran" class="w-[90px]" /></td>
+            <td><input v-model="v.warna" required aria-label="Warna" /></td>
+            <td><input v-model="v.sku" placeholder="Otomatis" aria-label="SKU" /></td>
+            <td class="text-right">
+              <span v-if="v.id_varian" class="tabular-nums">{{ v.stok }}</span>
+              <input
+                v-else
+                v-model.number="v.stok_awal"
+                type="number"
+                min="0"
+                aria-label="Stok awal"
+                class="w-[90px] tabular-nums"
+                title="Stok awal"
+              />
+            </td>
+            <td class="text-right">
+              <input v-model.number="v.stok_minimum" type="number" min="0" aria-label="Stok minimum" class="w-[90px] tabular-nums" />
+            </td>
+            <td><input v-model="v.aktif" type="checkbox" aria-label="Dijual" /></td>
+            <td>
+              <UiTombol v-if="!v.id_varian" type="button" varian="polos" @click="hapusBaris(i)">Hapus</UiTombol>
+            </td>
+          </tr>
+        </tbody>
+      </UiTabel>
+      <div>
+        <UiTombol type="button" varian="polos" @click="tambahBaris">Tambah satu varian</UiTombol>
+      </div>
+      <p v-if="ubah" class="text-sm text-redup">
         Stok varian yang sudah ada tidak diubah di sini; perubahan stok tercatat lewat barang masuk dan stok opname (siklus berikutnya).
         Varian yang tidak dijual lagi cukup dihilangkan centangnya agar riwayatnya tetap tersimpan.
       </p>
     </section>
-  </form>
+  </UiHalaman>
 </template>
-
-<style scoped>
-.bagian {
-  display: grid;
-  gap: 16px;
-  padding: 20px;
-}
-.kisi {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  align-items: end;
-}
-.kisi .lebar {
-  grid-column: span 2;
-}
-.kategori-baru {
-  display: flex;
-  gap: 8px;
-  align-items: end;
-}
-.kategori-baru .isian {
-  flex: 1;
-}
-.centang {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  font-weight: 600;
-}
-.kombinasi {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 12px;
-  align-items: end;
-}
-td input {
-  min-height: 38px;
-  padding: 6px 8px;
-}
-input.pendek {
-  width: 90px;
-}
-tr.mati td {
-  color: var(--redup);
-  background: var(--kertas);
-}
-.tombol-baris {
-  display: flex;
-  gap: 10px;
-}
-@media (max-width: 640px) {
-  .kisi .lebar {
-    grid-column: auto;
-  }
-  .kombinasi {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

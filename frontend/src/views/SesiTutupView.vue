@@ -6,6 +6,10 @@ import { useSesi } from '@/stores/sesi'
 import { useKeranjang } from '@/stores/keranjang'
 import { parseRupiah, ribuan, rupiah, waktu } from '@/format'
 import type { Rekap } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const sesi = useSesi()
 const router = useRouter()
@@ -51,129 +55,70 @@ async function tutup() {
 </script>
 
 <template>
-  <div class="halaman sempit">
+  <UiHalaman ukuran="sedang">
     <div>
       <h1>{{ hasil ? 'Sesi ditutup' : 'Tutup sesi kasir' }}</h1>
-      <p v-if="rekap" class="redup">
+      <p v-if="rekap" class="text-redup">
         {{ rekap.sesi.nama_kasir }}, dibuka {{ waktu(rekap.sesi.waktu_buka) }}
         <template v-if="rekap.sesi.waktu_tutup">, ditutup {{ waktu(rekap.sesi.waktu_tutup) }}</template>
       </p>
     </div>
 
-    <p v-if="galat" class="pesan galat" role="alert">{{ galat }}</p>
+    <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
     <template v-if="rekap">
-      <div class="panel rekap">
+      <div class="grid gap-3 rounded-sedang border border-garis bg-white p-5">
         <h2>Kas di laci</h2>
-        <dl>
-          <div><dt>Modal awal</dt><dd class="angka">{{ rupiah(rekap.sesi.modal_awal) }}</dd></div>
-          <div><dt>Penjualan tunai</dt><dd class="angka">+ {{ rupiah(rekap.penjualan_tunai) }}</dd></div>
-          <div v-if="rekap.refund_tunai"><dt>Pengembalian tunai</dt><dd class="angka">− {{ rupiah(rekap.refund_tunai) }}</dd></div>
-          <div class="jumlah"><dt>Kas seharusnya</dt><dd class="angka">{{ rupiah(rekap.kas_seharusnya) }}</dd></div>
+        <dl class="grid gap-1.5 [&_dd]:font-semibold [&>div]:flex [&>div]:justify-between [&>div]:gap-3">
+          <div><dt>Modal awal</dt><dd class="tabular-nums">{{ rupiah(rekap.sesi.modal_awal) }}</dd></div>
+          <div><dt>Penjualan tunai</dt><dd class="tabular-nums">+ {{ rupiah(rekap.penjualan_tunai) }}</dd></div>
+          <div v-if="rekap.refund_tunai"><dt>Pengembalian tunai</dt><dd class="tabular-nums">− {{ rupiah(rekap.refund_tunai) }}</dd></div>
+          <div class="border-t border-garis pt-2 text-[1.1rem] font-bold">
+            <dt>Kas seharusnya</dt><dd class="tabular-nums">{{ rupiah(rekap.kas_seharusnya) }}</dd>
+          </div>
         </dl>
         <h2>Pembayaran nontunai</h2>
-        <dl>
-          <div><dt>Transfer</dt><dd class="angka">{{ rupiah(rekap.penjualan_transfer) }}</dd></div>
-          <div><dt>QRIS</dt><dd class="angka">{{ rupiah(rekap.penjualan_qris) }}</dd></div>
+        <dl class="grid gap-1.5 [&_dd]:font-semibold [&>div]:flex [&>div]:justify-between [&>div]:gap-3">
+          <div><dt>Transfer</dt><dd class="tabular-nums">{{ rupiah(rekap.penjualan_transfer) }}</dd></div>
+          <div><dt>QRIS</dt><dd class="tabular-nums">{{ rupiah(rekap.penjualan_qris) }}</dd></div>
         </dl>
-        <p class="kecil redup">
+        <p class="text-sm text-redup">
           {{ rekap.jumlah_transaksi }} transaksi, total penjualan {{ rupiah(rekap.total_penjualan) }}. Cocokkan transfer dan QRIS dengan
           mutasi rekening atau aplikasi pembayaran.
         </p>
       </div>
 
-      <div v-if="hasil" class="panel isi">
-        <p class="pesan" :class="hasil.sesi.selisih === 0 ? 'berhasil' : 'info'">
+      <div v-if="hasil" class="grid gap-4 rounded-sedang border border-garis bg-white p-5">
+        <UiPesan :jenis="hasil.sesi.selisih === 0 ? 'berhasil' : 'info'">
           Kas fisik {{ rupiah(hasil.sesi.kas_fisik ?? 0) }}. {{ tandaSelisih(hasil.sesi.selisih ?? 0) }}.
           <template v-if="hasil.sesi.alasan_selisih"> Alasan: {{ hasil.sesi.alasan_selisih }}</template>
-        </p>
-        <div class="tombol-baris">
-          <RouterLink to="/sesi/buka" class="tombol">Buka sesi baru</RouterLink>
-          <button class="tombol kedua" @click="router.push('/riwayat')">Lihat riwayat</button>
+        </UiPesan>
+        <div class="flex flex-wrap gap-2.5">
+          <UiTombol to="/sesi/buka">Buka sesi baru</UiTombol>
+          <UiTombol varian="kedua" @click="router.push('/riwayat')">Lihat riwayat</UiTombol>
         </div>
       </div>
 
-      <form v-else class="panel isi" @submit.prevent="tutup">
-        <label class="isian">
-          Kas fisik yang dihitung
-          <small>Hitung seluruh uang tunai di laci, termasuk modal awal.</small>
-          <input v-model="kasFisik" inputmode="numeric" class="angka besar" placeholder="0" autofocus @blur="rapikan" />
-        </label>
+      <form v-else class="grid gap-4 rounded-sedang border border-garis bg-white p-5" @submit.prevent="tutup">
+        <UiIsian label="Kas fisik yang dihitung" petunjuk="Hitung seluruh uang tunai di laci, termasuk modal awal.">
+          <input v-model="kasFisik" inputmode="numeric" class="min-h-14 text-2xl font-bold tabular-nums" placeholder="0" autofocus @blur="rapikan" />
+        </UiIsian>
 
-        <div v-if="terisi" class="selisih" :class="selisih === 0 ? 'sesuai' : 'beda'">
+        <div
+          v-if="terisi"
+          class="flex justify-between rounded-kecil px-3.5 py-3 font-semibold"
+          :class="selisih === 0 ? 'bg-aman-terang text-aman' : 'bg-bahaya-terang text-bahaya'"
+        >
           <span>Selisih</span>
-          <strong class="angka">{{ tandaSelisih(selisih) }}</strong>
+          <strong class="tabular-nums">{{ tandaSelisih(selisih) }}</strong>
         </div>
 
-        <label v-if="perluAlasan" class="isian">
-          Alasan selisih
-          <small>Wajib diisi. Pemilik dapat meninjau alasan ini.</small>
+        <UiIsian v-if="perluAlasan" label="Alasan selisih" petunjuk="Wajib diisi. Pemilik dapat meninjau alasan ini.">
           <textarea v-model="alasan" required placeholder="mis. salah memberi kembalian pada transaksi siang"></textarea>
-        </label>
+        </UiIsian>
 
-        <button class="tombol besar" :disabled="memproses || !terisi">Tutup sesi</button>
+        <UiTombol ukuran="besar" :disabled="memproses || !terisi">Tutup sesi</UiTombol>
       </form>
     </template>
-  </div>
+  </UiHalaman>
 </template>
-
-<style scoped>
-.sempit {
-  max-width: 560px;
-}
-.rekap {
-  display: grid;
-  gap: 12px;
-  padding: 20px;
-}
-dl {
-  margin: 0;
-  display: grid;
-  gap: 6px;
-}
-dl div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-dd {
-  margin: 0;
-  font-weight: 600;
-}
-dl .jumlah {
-  padding-top: 8px;
-  border-top: 1px solid var(--garis);
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-.isi {
-  display: grid;
-  gap: 16px;
-  padding: 20px;
-}
-input.besar {
-  font-size: 1.5rem;
-  font-weight: 700;
-  min-height: 56px;
-}
-.selisih {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-radius: var(--r-kecil);
-  font-weight: 600;
-}
-.selisih.sesuai {
-  background: var(--aman-terang);
-  color: var(--aman);
-}
-.selisih.beda {
-  background: var(--bahaya-terang);
-  color: var(--bahaya);
-}
-.tombol-baris {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-</style>

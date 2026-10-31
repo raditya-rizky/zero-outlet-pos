@@ -3,6 +3,13 @@ import { computed, onMounted, ref } from 'vue'
 import { api, pesanError } from '@/api'
 import { waktu } from '@/format'
 import type { HalamanLog, LogAktivitas, Pengguna } from '@/types'
+import UiHalaman from '@/components/ui/UiHalaman.vue'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
+import UiLencana from '@/components/ui/UiLencana.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTabel from '@/components/ui/UiTabel.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const AKSI: Record<string, string> = {
   login: 'Login',
@@ -71,104 +78,70 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="halaman">
-    <div>
-      <h1>Log aktivitas</h1>
-      <p class="redup">Jejak siapa melakukan apa dan kapan. Log hanya dapat dibaca; tidak ada yang dapat mengubah atau menghapusnya.</p>
-    </div>
+  <UiHalaman>
+    <UiKepalaHalaman judul="Log aktivitas">
+      <template #deskripsi>Jejak siapa melakukan apa dan kapan. Log hanya dapat dibaca; tidak ada yang dapat mengubah atau menghapusnya.</template>
+    </UiKepalaHalaman>
 
-    <form class="saring" @submit.prevent="muat(1)">
-      <label class="isian">
-        Pengguna
+    <form class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_160px]" @submit.prevent="muat(1)">
+      <UiIsian label="Pengguna">
         <select v-model="idPengguna">
           <option value="">Semua pengguna</option>
           <option v-for="p in pengguna" :key="p.id_pengguna" :value="p.id_pengguna">{{ p.nama }}</option>
         </select>
-      </label>
-      <label class="isian">
-        Aktivitas
+      </UiIsian>
+      <UiIsian label="Aktivitas">
         <select v-model="aksi">
           <option value="">Semua aktivitas</option>
           <option v-for="(label, kunci) in AKSI" :key="kunci" :value="kunci">{{ label }}</option>
         </select>
-      </label>
-      <label class="isian">Dari <input v-model="dari" type="date" /></label>
-      <label class="isian">Sampai <input v-model="sampai" type="date" /></label>
-      <button class="tombol">Tampilkan</button>
+      </UiIsian>
+      <UiIsian label="Dari"><input v-model="dari" type="date" /></UiIsian>
+      <UiIsian label="Sampai"><input v-model="sampai" type="date" /></UiIsian>
+      <UiTombol>Tampilkan</UiTombol>
     </form>
 
-    <p v-if="galat" class="pesan galat">{{ galat }}</p>
+    <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-    <div v-if="hasil" class="tabel-bungkus">
-      <table>
-        <thead>
-          <tr>
-            <th>Waktu</th>
-            <th>Pengguna</th>
-            <th>Aktivitas</th>
-            <th>Data</th>
-            <th>Rincian</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="l in hasil.data" :key="l.id_log">
-            <td class="nowrap">{{ waktu(l.waktu) }}</td>
-            <td>{{ l.nama_pengguna ?? 'Tidak dikenal' }}</td>
-            <td>
-              <span class="lencana" :class="{ bahaya: l.aksi === 'login_gagal' }">{{ AKSI[l.aksi] ?? l.aksi }}</span>
-            </td>
-            <td class="nowrap">{{ l.objek }}<span v-if="l.id_objek" class="redup"> #{{ l.id_objek }}</span></td>
-            <td class="rincian">
-              <p v-if="l.keterangan">{{ l.keterangan }}</p>
-              <details v-if="perubahan(l).length">
-                <summary>{{ perubahan(l).length }} kolom {{ l.nilai_lama ? 'berubah' : 'tercatat' }}</summary>
-                <ul>
-                  <li v-for="c in perubahan(l)" :key="c.kolom">
-                    <strong>{{ c.kolom }}</strong>:
-                    <template v-if="c.lama !== undefined"><del>{{ c.lama }}</del> menjadi </template>
-                    <span>{{ c.baru ?? '(dihapus)' }}</span>
-                  </li>
-                </ul>
-              </details>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-if="!hasil.data.length" class="kosong">Tidak ada aktivitas yang cocok dengan saringan.</p>
-    </div>
+    <UiTabel v-if="hasil" :kosong="!hasil.data.length ? 'Tidak ada aktivitas yang cocok dengan saringan.' : null">
+      <thead>
+        <tr>
+          <th>Waktu</th>
+          <th>Pengguna</th>
+          <th>Aktivitas</th>
+          <th>Data</th>
+          <th>Rincian</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="l in hasil.data" :key="l.id_log">
+          <td class="whitespace-nowrap">{{ waktu(l.waktu) }}</td>
+          <td>{{ l.nama_pengguna ?? 'Tidak dikenal' }}</td>
+          <td>
+            <UiLencana :warna="l.aksi === 'login_gagal' ? 'bahaya' : 'denim'">{{ AKSI[l.aksi] ?? l.aksi }}</UiLencana>
+          </td>
+          <td class="whitespace-nowrap">{{ l.objek }}<span v-if="l.id_objek" class="text-redup"> #{{ l.id_objek }}</span></td>
+          <td class="max-w-[480px] text-[0.9rem]">
+            <p v-if="l.keterangan">{{ l.keterangan }}</p>
+            <details v-if="perubahan(l).length">
+              <summary class="cursor-pointer text-denim">{{ perubahan(l).length }} kolom {{ l.nilai_lama ? 'berubah' : 'tercatat' }}</summary>
+              <ul class="mt-1.5 list-disc pl-[18px] break-words">
+                <li v-for="c in perubahan(l)" :key="c.kolom">
+                  <strong>{{ c.kolom }}</strong>:
+                  <template v-if="c.lama !== undefined"><del class="text-bahaya">{{ c.lama }}</del> menjadi </template>
+                  <span>{{ c.baru ?? '(dihapus)' }}</span>
+                </li>
+              </ul>
+            </details>
+          </td>
+        </tr>
+      </tbody>
+    </UiTabel>
 
-    <nav v-if="hasil && jumlahHalaman > 1" class="halaman-nav" aria-label="Halaman log">
-      <button class="tombol kedua" :disabled="halaman <= 1" @click="muat(halaman - 1)">Sebelumnya</button>
-      <span class="redup">Halaman {{ halaman }} dari {{ jumlahHalaman }}</span>
-      <button class="tombol kedua" :disabled="halaman >= jumlahHalaman" @click="muat(halaman + 1)">Berikutnya</button>
+    <nav v-if="hasil && jumlahHalaman > 1" class="flex items-center justify-center gap-4" aria-label="Halaman log">
+      <UiTombol varian="kedua" :disabled="halaman <= 1" @click="muat(halaman - 1)">Sebelumnya</UiTombol>
+      <span class="text-redup">Halaman {{ halaman }} dari {{ jumlahHalaman }}</span>
+      <UiTombol varian="kedua" :disabled="halaman >= jumlahHalaman" @click="muat(halaman + 1)">Berikutnya</UiTombol>
     </nav>
-  </div>
+  </UiHalaman>
 </template>
-
-<style scoped>
-.nowrap {
-  white-space: nowrap;
-}
-.rincian {
-  max-width: 480px;
-  font-size: 0.9rem;
-}
-.rincian ul {
-  margin: 6px 0 0;
-  padding-left: 18px;
-  word-break: break-word;
-}
-.rincian del {
-  color: var(--bahaya);
-}
-summary {
-  cursor: pointer;
-  color: var(--denim);
-}
-.halaman-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-</style>

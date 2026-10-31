@@ -3,6 +3,9 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/stores/auth'
 import { pesanError } from '@/api'
+import UiIsian from '@/components/ui/UiIsian.vue'
+import UiPesan from '@/components/ui/UiPesan.vue'
+import UiTombol from '@/components/ui/UiTombol.vue'
 
 const auth = useAuth()
 const router = useRouter()
@@ -30,62 +33,30 @@ async function masuk() {
 </script>
 
 <template>
-  <div class="latar">
-    <form class="kartu" @submit.prevent="masuk">
-      <div class="merek">
+  <div
+    class="grid min-h-dvh place-items-center bg-indigo bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.03)_0_2px,transparent_2px_9px)] px-4 py-6"
+  >
+    <form class="grid w-full max-w-[400px] gap-[18px] rounded-sedang bg-white px-6 py-7 shadow-login" @submit.prevent="masuk">
+      <div class="mb-1 flex items-center gap-3">
         <svg viewBox="0 0 32 32" width="44" height="44" aria-hidden="true">
-          <path d="M4 6h14l10 10-12 12L4 18z" fill="var(--tag)" />
-          <circle cx="10" cy="12" r="2.5" fill="var(--indigo)" />
+          <path d="M4 6h14l10 10-12 12L4 18z" fill="var(--color-tag)" />
+          <circle cx="10" cy="12" r="2.5" fill="var(--color-indigo)" />
         </svg>
         <div>
-          <h1>Zero Outlet</h1>
-          <p class="redup">Aplikasi kasir toko</p>
+          <h1 class="text-[1.7rem] font-extrabold font-stretch-125%">Zero Outlet</h1>
+          <p class="text-redup">Aplikasi kasir toko</p>
         </div>
       </div>
 
-      <p v-if="galat" class="pesan galat" role="alert">{{ galat }}</p>
+      <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 
-      <label class="isian">
-        Nama pengguna
+      <UiIsian label="Nama pengguna">
         <input v-model="username" autocomplete="username" autocapitalize="none" required autofocus />
-      </label>
-      <label class="isian">
-        Kata sandi
+      </UiIsian>
+      <UiIsian label="Kata sandi">
         <input v-model="kataSandi" type="password" autocomplete="current-password" required />
-      </label>
-      <button class="tombol besar" :disabled="memproses">{{ memproses ? 'Memeriksa…' : 'Masuk' }}</button>
+      </UiIsian>
+      <UiTombol ukuran="besar" :disabled="memproses">{{ memproses ? 'Memeriksa…' : 'Masuk' }}</UiTombol>
     </form>
   </div>
 </template>
-
-<style scoped>
-.latar {
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: 24px 16px;
-  background:
-    repeating-linear-gradient(135deg, rgb(255 255 255 / 0.03) 0 2px, transparent 2px 9px),
-    var(--indigo);
-}
-.kartu {
-  width: min(400px, 100%);
-  display: grid;
-  gap: 18px;
-  padding: 28px 24px;
-  background: var(--putih);
-  border-radius: var(--r);
-  box-shadow: 0 24px 60px rgb(0 0 0 / 0.25);
-}
-.merek {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-h1 {
-  font-size: 1.7rem;
-  font-stretch: 125%;
-  font-weight: 800;
-}
-</style>

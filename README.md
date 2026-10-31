@@ -4,7 +4,7 @@ Aplikasi kasir (Point of Sale) berbasis web untuk UMKM pakaian, dengan studi kas
 Capstone Project STSI4440 Kelompok D, Universitas Terbuka.
 
 - **Backend:** Rust + Axum (REST API), SQLx, PostgreSQL
-- **Frontend:** Vue 3 + Vite (SPA), Pinia, Vue Router
+- **Frontend:** Vue 3 + Vite (SPA), Pinia, Vue Router, Tailwind CSS v4
 - **Basis data:** PostgreSQL 17 (lewat Docker)
 
 Backend juga menyajikan hasil build frontend, sehingga di komputer toko hanya perlu satu program server dan satu basis data.
@@ -105,6 +105,8 @@ frontend/src/
   views/           halaman (Kasir, Struk, Riwayat, Sesi, Produk, Pengguna, Log)
   stores/          auth, sesi kasir, keranjang
   components/      label harga, dialog, kertas struk
+  components/ui/   komponen dasar Tailwind (tombol, isian, pesan, lencana, tabel, kerangka halaman)
+  styles.css       tema Tailwind (warna toko, font, radius) dan gaya dasar elemen
 ```
 
 ## Catatan rancangan untuk Bab IV
