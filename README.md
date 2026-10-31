@@ -26,7 +26,7 @@ Backend juga menyajikan hasil build frontend, sehingga di komputer toko hanya pe
 
 ## Menjalankan untuk pengembangan
 
-Prasyarat: Docker, Rust (stable), Node.js 20.19 atau 22.12 ke atas.
+Prasyarat: Docker, Rust (stable), Node.js 20.19 atau 22.12 ke atas, dan pnpm 10.
 
 ```bash
 # 1. Basis data
@@ -42,7 +42,7 @@ cd backend && cargo run --bin seed
 cargo run
 
 # 5. Di terminal lain: frontend dengan hot reload di port 5173
-cd frontend && npm install && npm run dev
+cd frontend && pnpm install && pnpm dev
 ```
 
 Buka http://localhost:5173. Akun bawaan dari data contoh:
@@ -60,7 +60,7 @@ Ganti kata sandi ini sebelum dipakai di toko.
 cd backend
 cargo test                       # uji unit + uji integrasi (butuh Postgres dari docker compose)
 cargo clippy --all-targets -- -D warnings
-cd ../frontend && npm run typecheck
+cd ../frontend && pnpm typecheck
 ```
 
 Uji integrasi di `backend/tests/api.rs` mengikuti skenario uji Tabel 25:
@@ -77,7 +77,7 @@ Ada juga uji dua kasir yang menjual unit terakhir secara bersamaan. Setiap uji m
 ## Pemasangan di komputer toko (mode lokal)
 
 1. Pasang Docker, lalu jalankan `docker compose up -d`.
-2. Build frontend: `cd frontend && npm ci && npm run build`.
+2. Build frontend: `cd frontend && pnpm install --frozen-lockfile && pnpm build`.
 3. Build backend: `cd backend && cargo build --release`.
 4. Salin `.env.example` ke `backend/.env`. Ubah `ADMIN_PASSWORD`, dan pastikan `FRONTEND_DIST=../frontend/dist`.
 5. Jalankan `./target/release/zero-outlet-pos` dari folder `backend`.
