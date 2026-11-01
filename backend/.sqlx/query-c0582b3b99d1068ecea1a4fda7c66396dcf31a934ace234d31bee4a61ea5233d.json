@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n             (SELECT count(*) FROM retur WHERE status = 'menunggu') AS \"pengajuan_menunggu!\",\n             (SELECT count(*) FROM varian v JOIN produk p ON p.id_produk = v.id_produk\n              WHERE v.aktif AND p.aktif AND v.stok <= v.stok_minimum) AS \"stok_menipis!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pengajuan_menunggu!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "stok_menipis!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "c0582b3b99d1068ecea1a4fda7c66396dcf31a934ace234d31bee4a61ea5233d"
+}

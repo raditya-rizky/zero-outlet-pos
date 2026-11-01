@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT nilai FROM pengaturan WHERE kunci = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "nilai",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8d9f96b5297801a2a2c2a93b088e73f8409c30d9dd504a73e7fe050220a362fd"
+}

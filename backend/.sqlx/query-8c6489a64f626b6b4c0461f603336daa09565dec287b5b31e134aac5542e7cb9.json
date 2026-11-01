@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT dr.id_detail_retur, dr.id_retur, dr.id_detail, d.id_varian, d.nama_barang, dr.jumlah, dr.nilai,\n                  dr.id_varian_pengganti,\n                  CASE WHEN vp.id_varian IS NULL THEN NULL ELSE pp.nama || ' ' || vp.ukuran || '/' || vp.warna END AS \"nama_pengganti?\"\n           FROM detail_retur dr\n           JOIN detail_transaksi d ON d.id_detail = dr.id_detail\n           LEFT JOIN varian vp ON vp.id_varian = dr.id_varian_pengganti\n           LEFT JOIN produk pp ON pp.id_produk = vp.id_produk\n           WHERE dr.id_retur = ANY($1)\n           ORDER BY dr.id_detail_retur",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_detail_retur",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_retur",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "id_detail",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "nama_barang",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "jumlah",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "nilai",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "id_varian_pengganti",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "nama_pengganti?",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8Array"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "8c6489a64f626b6b4c0461f603336daa09565dec287b5b31e134aac5542e7cb9"
+}

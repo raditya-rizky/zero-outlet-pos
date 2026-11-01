@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id_transaksi, t.no_faktur, t.tanggal_waktu, t.id_sesi, t.status, t.metode_bayar, t.subtotal, t.diskon,\n                  t.total, p.nama AS nama_kasir\n           FROM transaksi t JOIN pengguna p ON p.id_pengguna = t.id_pengguna\n           WHERE upper(t.no_faktur) = upper($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_transaksi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "no_faktur",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "tanggal_waktu",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "id_sesi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "metode_bayar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "subtotal",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "diskon",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "total",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 9,
+        "name": "nama_kasir",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6da87634a12147bc135018af4c57ab3abdbc825024e55a4490a9fec8a8c82da8"
+}

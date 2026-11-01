@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT stok_sesudah FROM mutasi_stok\n               WHERE id_varian = $1 AND tanggal < $2::date::timestamp AT TIME ZONE $3\n               ORDER BY tanggal DESC, id_mutasi DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "stok_sesudah",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Date",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b0dff2cb1f4e8287290be830de4bb07d70ca6baeb00d247a3eabb6457d73e633"
+}

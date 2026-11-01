@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id_varian, p.id_produk, p.nama, p.harga_beli, p.harga_jual\n           FROM varian v JOIN produk p ON p.id_produk = v.id_produk\n           WHERE v.id_varian = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "harga_beli",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "harga_jual",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8Array"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "da46ffb334092c150415717f086733b709dd2b849c05cd75844419b8e2c830d7"
+}

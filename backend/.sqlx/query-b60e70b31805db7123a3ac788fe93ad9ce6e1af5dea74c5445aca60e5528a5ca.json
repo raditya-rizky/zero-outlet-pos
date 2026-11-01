@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE transaksi SET status = 'batal' WHERE id_transaksi = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b60e70b31805db7123a3ac788fe93ad9ce6e1af5dea74c5445aca60e5528a5ca"
+}

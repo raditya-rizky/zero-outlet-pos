@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id_pengguna, p.nama, p.username, p.peran\n                   FROM sesi_login s JOIN pengguna p ON p.id_pengguna = s.id_pengguna\n                   WHERE s.token_hash = $1\n                     AND p.aktif\n                     AND s.terakhir_aktif > now() - make_interval(mins => $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nama",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "username",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "peran",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b83b0b5af07c7b307e13a0d28aa44b8897b719069006fbaeab7d818aae8e850b"
+}

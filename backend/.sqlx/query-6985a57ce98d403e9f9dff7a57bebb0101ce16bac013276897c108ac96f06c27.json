@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT b.id_barang_masuk, b.tanggal, b.no_referensi, b.id_pemasok, s.nama AS \"nama_pemasok?\", p.nama AS nama_pengguna,\n                  b.keterangan, b.dibuat_pada,\n                  coalesce((SELECT sum(d.jumlah) FROM detail_barang_masuk d WHERE d.id_barang_masuk = b.id_barang_masuk), 0)::bigint AS \"jumlah_unit!\",\n                  coalesce((SELECT sum(d.jumlah * d.harga_beli) FROM detail_barang_masuk d WHERE d.id_barang_masuk = b.id_barang_masuk), 0)::bigint AS \"total_nilai!\"\n           FROM barang_masuk b\n           JOIN pengguna p ON p.id_pengguna = b.id_pengguna\n           LEFT JOIN pemasok s ON s.id_pemasok = b.id_pemasok\n           WHERE ($1::bigint IS NULL OR b.id_barang_masuk = $1)\n             AND ($2::date IS NULL OR b.tanggal >= $2)\n             AND ($3::date IS NULL OR b.tanggal <= $3)\n           ORDER BY b.tanggal DESC, b.id_barang_masuk DESC\n           LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_barang_masuk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "tanggal",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "no_referensi",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "id_pemasok",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "nama_pemasok?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "nama_pengguna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "keterangan",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "dibuat_pada",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "jumlah_unit!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 9,
+        "name": "total_nilai!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "6985a57ce98d403e9f9dff7a57bebb0101ce16bac013276897c108ac96f06c27"
+}

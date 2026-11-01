@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id_transaksi, id_sesi, status, diskon, total, metode_bayar, no_faktur FROM transaksi WHERE id_transaksi = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_transaksi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_sesi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "diskon",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "total",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "metode_bayar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "no_faktur",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "31f1d573d0202db3043f67dfeaccd2073f2218fd56558e160ce6eb275e8bfafb"
+}

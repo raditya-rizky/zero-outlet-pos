@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id_varian, v.id_produk, v.ukuran, v.warna, v.stok\n           FROM varian v JOIN produk p ON p.id_produk = v.id_produk\n           WHERE v.id_produk = ANY($1) AND v.aktif AND p.aktif\n           ORDER BY array_position(ARRAY['XS','S','M','L','XL','XXL','XXXL'], upper(v.ukuran)) NULLS LAST, v.ukuran, v.warna",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "ukuran",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "warna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "stok",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8Array"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "172ebb624e6196958ed9ba0f6554160ccbb493400e148a300cda23d1db8247da"
+}

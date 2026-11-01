@@ -1,0 +1,74 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id_varian, v.id_produk, p.nama AS nama_produk, p.kode, v.sku, v.ukuran, v.warna, v.stok, v.stok_minimum,\n                  (SELECT max(t.tanggal_waktu) FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi\n                   WHERE d.id_varian = v.id_varian AND t.status = 'selesai') AS terakhir_terjual\n           FROM varian v JOIN produk p ON p.id_produk = v.id_produk\n           WHERE v.aktif AND p.aktif AND v.stok <= v.stok_minimum\n           ORDER BY v.stok - v.stok_minimum, p.nama, v.ukuran, v.warna",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama_produk",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "kode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "sku",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "ukuran",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "warna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "stok",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "stok_minimum",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "terakhir_terjual",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "e419b8c121080bdd553c62ce2a5fdc2d6ccb5e552e920f3c81921fc8ca7c6a45"
+}

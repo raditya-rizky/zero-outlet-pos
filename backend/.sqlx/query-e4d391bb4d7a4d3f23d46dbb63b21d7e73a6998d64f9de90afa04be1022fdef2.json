@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id_retur, r.jenis, t.no_faktur FROM retur r JOIN transaksi t USING (id_transaksi) WHERE r.id_sesi = $1 AND r.status = 'menunggu' LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_retur",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "jenis",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "no_faktur",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e4d391bb4d7a4d3f23d46dbb63b21d7e73a6998d64f9de90afa04be1022fdef2"
+}

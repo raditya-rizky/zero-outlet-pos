@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id_detail, d.id_varian, d.nama_barang, d.jumlah, d.harga_satuan, d.diskon_item, d.subtotal,\n                  coalesce((SELECT sum(dr.jumlah) FROM detail_retur dr JOIN retur r ON r.id_retur = dr.id_retur\n                            WHERE dr.id_detail = d.id_detail AND r.status = 'disetujui'), 0)::bigint AS \"jumlah_diretur!\"\n           FROM detail_transaksi d WHERE d.id_transaksi = $1 ORDER BY d.id_detail",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_detail",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama_barang",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "jumlah",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "harga_satuan",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "diskon_item",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "subtotal",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "jumlah_diretur!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "c0c552dd6d0026e15f3bec01e4e41cc74cc9f888a3d7662b6c36be1c95c92834"
+}

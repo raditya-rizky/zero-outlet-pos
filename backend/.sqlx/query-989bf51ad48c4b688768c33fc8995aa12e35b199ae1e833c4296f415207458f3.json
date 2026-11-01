@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO barang_masuk (no_referensi, tanggal, id_pemasok, id_pengguna, keterangan)\n           VALUES ($1, coalesce($2, CURRENT_DATE), $3, $4, $5) RETURNING id_barang_masuk",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_barang_masuk",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Date",
+        "Int8",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "989bf51ad48c4b688768c33fc8995aa12e35b199ae1e833c4296f415207458f3"
+}

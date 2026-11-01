@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(sum(total_pengembalian), 0)::bigint AS \"refund!\"\n           FROM retur\n           WHERE id_sesi = $1 AND metode_pengembalian = 'tunai' AND status = 'disetujui'\n             -- Pembatalan tidak dihitung di sini: penjualannya sudah keluar dari\n             -- penjualan tunai karena berstatus batal.\n             AND jenis <> 'batal'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "refund!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "777b5cf10948c73000b7fded17da32e768cf4d904bd47995c09187fb5399cd69"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE retur SET status = 'disetujui', id_otorisator = $2, waktu_keputusan = now() WHERE id_retur = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ce243d8642c9775da5ace31d71662b13f0aed1afcbb6c32a8057f0e24cb800a3"
+}

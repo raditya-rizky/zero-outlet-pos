@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id_varian, v.id_produk, p.nama AS nama_produk, p.kode, v.sku, v.ukuran, v.warna, v.stok, v.stok_minimum,\n                  (SELECT max(t.tanggal_waktu) FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi\n                   WHERE d.id_varian = v.id_varian AND t.status = 'selesai') AS terakhir_terjual\n           FROM varian v JOIN produk p ON p.id_produk = v.id_produk\n           WHERE v.aktif AND p.aktif AND v.stok > 0\n             AND p.dibuat_pada < now() - make_interval(days => $1)\n             AND NOT EXISTS (\n               SELECT 1 FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi\n               WHERE d.id_varian = v.id_varian AND t.status = 'selesai'\n                 AND t.tanggal_waktu >= now() - make_interval(days => $1)\n             )\n           ORDER BY terakhir_terjual NULLS FIRST, p.nama, v.ukuran, v.warna",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama_produk",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "kode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "sku",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "ukuran",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "warna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "stok",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "stok_minimum",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "terakhir_terjual",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "3eaf6ad4417e2f796b2f211af240b3fe5c691b3fc03135dccbd22f783dbdb4a8"
+}

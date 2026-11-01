@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO retur (id_transaksi, jenis, alasan, total_pengembalian, metode_pengembalian, id_sesi, id_pengguna)\n           VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_retur",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_retur",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Int8",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0dda86662ed18b9ffc6ca8f897c68272e5d1b19cdd447a0c54f608c9fb7e42dc"
+}

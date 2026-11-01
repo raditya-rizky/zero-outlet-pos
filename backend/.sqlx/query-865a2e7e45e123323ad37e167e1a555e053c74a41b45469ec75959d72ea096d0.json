@@ -1,0 +1,114 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id_retur, r.id_transaksi, t.no_faktur, t.tanggal_waktu AS tanggal_transaksi, r.jenis, r.status,\n                  r.alasan, r.alasan_tolak, r.total_pengembalian, r.metode_pengembalian, r.id_sesi, r.id_pengguna,\n                  p.nama AS nama_pengaju, o.nama AS \"nama_otorisator?\", r.tanggal_waktu, r.waktu_keputusan\n           FROM retur r\n           JOIN transaksi t ON t.id_transaksi = r.id_transaksi\n           JOIN pengguna p ON p.id_pengguna = r.id_pengguna\n           LEFT JOIN pengguna o ON o.id_pengguna = r.id_otorisator\n           WHERE ($1::bigint IS NULL OR r.id_retur = $1)\n             AND ($2::bigint IS NULL OR r.id_pengguna = $2)\n             AND ($3::text IS NULL OR r.status = $3)\n           ORDER BY r.tanggal_waktu DESC\n           LIMIT 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_retur",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_transaksi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "no_faktur",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "tanggal_transaksi",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "jenis",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "alasan",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "alasan_tolak",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "total_pengembalian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 9,
+        "name": "metode_pengembalian",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "id_sesi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 11,
+        "name": "id_pengguna",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 12,
+        "name": "nama_pengaju",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "nama_otorisator?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 14,
+        "name": "tanggal_waktu",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "waktu_keputusan",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "865a2e7e45e123323ad37e167e1a555e053c74a41b45469ec75959d72ea096d0"
+}

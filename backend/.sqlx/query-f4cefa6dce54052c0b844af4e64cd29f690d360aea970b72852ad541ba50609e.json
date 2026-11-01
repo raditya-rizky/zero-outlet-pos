@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id_detail, d.id_barang_masuk, d.id_varian, p.nama || ' ' || v.ukuran || '/' || v.warna AS \"nama_barang!\",\n                  v.sku, d.jumlah, d.harga_beli\n           FROM detail_barang_masuk d\n           JOIN varian v ON v.id_varian = d.id_varian\n           JOIN produk p ON p.id_produk = v.id_produk\n           WHERE d.id_barang_masuk = ANY($1)\n           ORDER BY d.id_detail",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_detail",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_barang_masuk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "nama_barang!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "sku",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "jumlah",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "harga_beli",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8Array"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f4cefa6dce54052c0b844af4e64cd29f690d360aea970b72852ad541ba50609e"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE retur SET status = 'ditolak', id_otorisator = $2, waktu_keputusan = now(), alasan_tolak = $3 WHERE id_retur = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d792a4a8ce483fee17cb10f6d8fffa7620960867fc0a13373750df6887bc4353"
+}

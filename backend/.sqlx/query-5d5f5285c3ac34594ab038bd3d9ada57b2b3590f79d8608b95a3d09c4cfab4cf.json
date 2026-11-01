@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id_varian, dr.jumlah, dr.id_varian_pengganti,\n                  (vp.id_varian IS NULL OR (vp.aktif AND pp.aktif)) AS \"pengganti_aktif!\"\n           FROM detail_retur dr\n           JOIN detail_transaksi d ON d.id_detail = dr.id_detail\n           LEFT JOIN varian vp ON vp.id_varian = dr.id_varian_pengganti\n           LEFT JOIN produk pp ON pp.id_produk = vp.id_produk\n           WHERE dr.id_retur = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "jumlah",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "id_varian_pengganti",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "pengganti_aktif!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "5d5f5285c3ac34594ab038bd3d9ada57b2b3590f79d8608b95a3d09c4cfab4cf"
+}

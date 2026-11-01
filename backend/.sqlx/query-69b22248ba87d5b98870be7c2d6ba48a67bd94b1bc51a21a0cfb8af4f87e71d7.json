@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.jenis, r.id_transaksi, r.total_pengembalian, t.no_faktur\n           FROM retur r JOIN transaksi t ON t.id_transaksi = r.id_transaksi\n           WHERE r.id_retur = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jenis",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_transaksi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "total_pengembalian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "no_faktur",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "69b22248ba87d5b98870be7c2d6ba48a67bd94b1bc51a21a0cfb8af4f87e71d7"
+}

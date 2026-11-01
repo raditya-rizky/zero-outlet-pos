@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE retur SET status = 'dibatalkan', waktu_keputusan = now() WHERE id_retur = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "99e7f03cf383f2278c0b0a2bf5884fc314f3250622691999212f2faa0803fd1a"
+}

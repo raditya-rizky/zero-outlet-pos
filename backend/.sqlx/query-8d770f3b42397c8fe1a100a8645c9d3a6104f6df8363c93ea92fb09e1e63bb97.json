@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO pemasok (nama, kontak, alamat) VALUES ($1, $2, $3) RETURNING id_pemasok, nama, kontak, alamat",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_pemasok",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nama",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "kontak",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "alamat",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "8d770f3b42397c8fe1a100a8645c9d3a6104f6df8363c93ea92fb09e1e63bb97"
+}

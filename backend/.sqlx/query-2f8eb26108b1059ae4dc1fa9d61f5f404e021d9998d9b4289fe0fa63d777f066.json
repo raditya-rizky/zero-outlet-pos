@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id_retur, jenis, status, total_pengembalian, tanggal_waktu FROM retur WHERE id_transaksi = $1 ORDER BY tanggal_waktu",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_retur",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "jenis",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "total_pengembalian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "tanggal_waktu",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "2f8eb26108b1059ae4dc1fa9d61f5f404e021d9998d9b4289fe0fa63d777f066"
+}

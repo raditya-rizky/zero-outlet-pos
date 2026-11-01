@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM varian v JOIN produk p ON p.id_produk = v.id_produk\n                                          WHERE v.id_varian = $1 AND v.id_produk = $2 AND v.aktif AND p.aktif) AS \"sah!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sah!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "30f383565a754a750602c21d5ae5a21d9623c48ec428b7d6b2e261938b62beec"
+}

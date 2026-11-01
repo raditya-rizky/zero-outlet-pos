@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id_mutasi, m.tanggal, m.jenis, m.jumlah, m.stok_sesudah, m.referensi, m.keterangan, p.nama AS nama_pengguna\n           FROM mutasi_stok m JOIN pengguna p ON p.id_pengguna = m.id_pengguna\n           WHERE m.id_varian = $1\n             AND ($2::date IS NULL OR m.tanggal >= $2::date::timestamp AT TIME ZONE $4)\n             AND ($3::date IS NULL OR m.tanggal < ($3::date + 1)::timestamp AT TIME ZONE $4)\n           ORDER BY m.tanggal, m.id_mutasi\n           LIMIT 1000",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_mutasi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "tanggal",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "jenis",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "jumlah",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "stok_sesudah",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "referensi",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "keterangan",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "nama_pengguna",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Date",
+        "Date",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "a84c957c6d1104ecfc1363d9e3e0422a017b5077113ee05e80290fcc9a43b30e"
+}
