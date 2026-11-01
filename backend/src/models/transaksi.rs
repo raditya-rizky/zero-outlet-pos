@@ -1,12 +1,15 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
-use super::kosong_jadi_none;
+use super::{kosong_jadi_none, pengajuan::RingkasPengajuan};
 use crate::services::hitung::MetodeBayar;
 
 #[derive(Debug, Deserialize)]
 pub struct BuatTransaksi {
     pub items: Vec<ItemBaru>,
+    /// Diskon untuk seluruh transaksi dalam rupiah (KF-07).
+    #[serde(default)]
+    pub diskon_transaksi: i64,
     pub metode_bayar: MetodeBayar,
     /// Wajib untuk pembayaran tunai.
     pub bayar: Option<i64>,
@@ -16,6 +19,9 @@ pub struct BuatTransaksi {
 pub struct ItemBaru {
     pub id_varian: i64,
     pub jumlah: i32,
+    /// Diskon untuk seluruh baris (bukan per unit) dalam rupiah.
+    #[serde(default)]
+    pub diskon_item: i64,
 }
 
 #[derive(Debug, Serialize)]
@@ -40,6 +46,8 @@ pub struct ItemStruk {
     pub harga_satuan: i64,
     pub diskon_item: i64,
     pub subtotal: i64,
+    /// Unit yang sudah diretur lewat pengajuan yang disetujui.
+    pub jumlah_diretur: i64,
 }
 
 #[derive(Debug, Serialize)]
@@ -68,6 +76,8 @@ pub struct Struk {
     pub jumlah_cetak: i32,
     pub cetak_ulang: bool,
     pub items: Vec<ItemStruk>,
+    /// Riwayat pengajuan pembatalan/retur/tukar untuk transaksi ini (KF-10).
+    pub pengajuan: Vec<RingkasPengajuan>,
 }
 
 #[derive(Debug, Deserialize)]

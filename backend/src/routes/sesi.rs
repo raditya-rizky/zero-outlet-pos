@@ -62,7 +62,11 @@ async fn hitung_rekap(conn: &mut PgConnection, sesi: Sesi) -> AppResult<Rekap> {
 
     let refund_tunai = sqlx::query_scalar!(
         r#"SELECT coalesce(sum(total_pengembalian), 0)::bigint AS "refund!"
-           FROM retur WHERE id_sesi = $1 AND metode_pengembalian = 'tunai'"#,
+           FROM retur
+           WHERE id_sesi = $1 AND metode_pengembalian = 'tunai' AND status = 'disetujui'
+             -- Pembatalan tidak dihitung di sini: penjualannya sudah keluar dari
+             -- penjualan tunai karena berstatus batal.
+             AND jenis <> 'batal'"#,
         sesi.id_sesi
     )
     .fetch_one(&mut *conn)
@@ -142,6 +146,20 @@ async fn tutup(pengguna: PenggunaLogin, State(state): State<AppState>, Path(id):
     periksa_akses(&pengguna, &sesi)?;
     if sesi.waktu_tutup.is_some() {
         return Err(AppError::konflik("Sesi kasir ini sudah ditutup"));
+    }
+    // Pengajuan yang belum diputuskan akan memengaruhi kas sesi ini, jadi harus
+    // diputuskan pemilik atau ditarik kasir sebelum sesi ditutup.
+    if let Some(p) = sqlx::query!(
+        "SELECT r.id_retur, r.jenis, t.no_faktur FROM retur r JOIN transaksi t USING (id_transaksi) WHERE r.id_sesi = $1 AND r.status = 'menunggu' LIMIT 1",
+        id
+    )
+    .fetch_optional(&mut *tx)
+    .await?
+    {
+        return Err(AppError::konflik(format!(
+            "Masih ada pengajuan {} untuk faktur {} yang menunggu persetujuan. Tarik pengajuan atau minta pemilik memutuskannya dulu.",
+            p.jenis, p.no_faktur
+        )));
     }
 
     let rekap = hitung_rekap(&mut tx, sesi).await?;

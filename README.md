@@ -9,7 +9,7 @@ Capstone Project STSI4440 Kelompok D, Universitas Terbuka.
 
 Backend juga menyajikan hasil build frontend, sehingga di komputer toko hanya perlu satu program server dan satu basis data.
 
-## Status: siklus prototipe 1
+## Status: siklus prototipe 2
 
 | Kebutuhan | Fitur | Status |
 | --- | --- | --- |
@@ -21,7 +21,12 @@ Backend juga menyajikan hasil build frontend, sehingga di komputer toko hanya pe
 | KF-09 | Struk 58 mm/PDF, riwayat, cetak ulang | Selesai |
 | KF-19 | Sesi kasir dan rekonsiliasi kas | Selesai |
 | KF-20 | Log aktivitas (pencatatan dan tampilan) | Selesai |
-| KF-07, KF-10–KF-14 | Diskon, retur, barang masuk, stok opname, kartu stok, peringatan | Siklus 2 (tabel sudah disiapkan) |
+| KF-07 | Diskon per baris dan per transaksi (Rp/%), batas diskon kasir | Selesai (siklus 2) |
+| KF-10 | Pembatalan, retur, tukar ukuran dengan persetujuan pemilik dari ponsel | Selesai (siklus 2) |
+| KF-11 | Barang masuk dari pemasok, harga beli mengikuti harga terbaru | Selesai (siklus 2) |
+| KF-12 | Stok opname dengan alasan wajib dan ringkasan akurasi | Selesai (siklus 2) |
+| KF-13 | Kartu stok per varian | Selesai (siklus 2) |
+| KF-14 | Peringatan stok menipis dan daftar lambat terjual, lencana menu | Selesai (siklus 2) |
 | KF-15–KF-18 | Laporan penjualan, ekspor, biaya, laba rugi | Siklus 3 (tabel sudah disiapkan) |
 
 ## Menjalankan untuk pengembangan
@@ -72,6 +77,16 @@ Uji integrasi di `backend/tests/api.rs` mengikuti skenario uji Tabel 25:
 - UJ-09: selisih kas wajib disertai alasan
 - UJ-10: perubahan harga tercatat di log
 
+Uji integrasi siklus 2 ada di `backend/tests/siklus2.rs`:
+- UJ-05: diskon transaksi 10% dengan pembayaran tunai
+- batas diskon kasir, dan admin tidak dibatasi
+- UJ-07: retur tanpa persetujuan pemilik belum mengubah stok dan kas; setelah disetujui, stok kembali dan refund tunai mengurangi kas seharusnya sekali saja
+- pembatalan (hanya di sesi yang sama), tukar ukuran (hanya produk yang sama), dan batas sisa retur
+- penutupan sesi terhalang pengajuan yang menunggu
+- UJ-08: stok opname wajib beralasan, beserta hasil akurasinya
+- barang masuk dan perubahan harga beli, kartu stok, serta daftar lambat terjual
+- polling tidak memperpanjang sesi login
+
 Ada juga uji dua kasir yang menjual unit terakhir secara bersamaan. Setiap uji memakai basis data sementara yang dibuat otomatis oleh `#[sqlx::test]`.
 
 ## Pemasangan di komputer toko (mode lokal)
@@ -85,6 +100,8 @@ Ada juga uji dua kasir yang menjual unit terakhir secara bersamaan. Setiap uji m
 
 Untuk mode cloud (HTTPS), set `COOKIE_SECURE=true`.
 
+**Persetujuan dari ponsel pemilik (KF-10).** Pemilik menyetujui pembatalan, retur, dan tukar ukuran di halaman *Persetujuan* lewat peramban ponsel. Pada mode lokal, ponsel harus terhubung ke Wi-Fi toko yang sama dengan komputer server. Agar pemilik dapat menyetujui dari luar toko, gunakan mode cloud (atau akses jaringan pribadi seperti VPN ke komputer toko). Jika pemilik tidak dapat dihubungi, kasir dapat menarik pengajuannya agar sesi kasir tetap bisa ditutup.
+
 Bila skema basis data berubah, perbarui cache kueri SQLx agar build tetap bisa berjalan tanpa basis data (`SQLX_OFFLINE=true`):
 
 ```bash
@@ -96,13 +113,13 @@ cd backend && cargo sqlx prepare -- --all-targets
 ```
 backend/
   migrations/      skrip SQL per modul (berjalan otomatis saat server start)
-  src/routes/      endpoint: auth, pengguna, produk, sesi, transaksi, log
-  src/services/    hitung (perhitungan uang), stok (mutasi + kartu stok), log, sandi
+  src/routes/      endpoint: auth, pengguna, produk, sesi, transaksi, pengajuan, barang_masuk, stok, pengaturan, log
+  src/services/    hitung (uang, diskon, nilai retur), stok (mutasi + kartu stok), log, pengaturan, sandi
   src/middleware/  autentikasi cookie dan otorisasi peran
   src/bin/seed.rs  data contoh sintetis
   tests/           uji integrasi API
 frontend/src/
-  views/           halaman (Kasir, Struk, Riwayat, Sesi, Produk, Pengguna, Log)
+  views/           halaman (Kasir, Struk, Riwayat, Pengajuan, Sesi, Persetujuan, Produk, Stok, Pengguna, Log, Pengaturan)
   stores/          auth, sesi kasir, keranjang
   components/      label harga, dialog, kertas struk
   components/ui/   komponen dasar Tailwind (tombol, isian, pesan, lencana, tabel, kerangka halaman)
@@ -124,3 +141,11 @@ frontend/src/
   - Baris varian dikunci dengan urutan id yang konsisten untuk mencegah *deadlock*.
 - **Harga dan total** selalu dihitung ulang di server dari basis data, bukan dari isian antarmuka.
 - **Kasir tidak menerima harga beli** dalam respons API (Tabel 2).
+- **Siklus 2, tabel `retur` menjadi tabel pengajuan** (migrasi 0009):
+  - `jenis`: `batal` | `retur` | `tukar`.
+  - Status: `menunggu` → `disetujui` | `ditolak` | `dibatalkan` (ditarik kasir).
+  - Nilai pengembalian dihitung saat pengajuan dibuat. Diskon transaksi dibagi proporsional per baris, dan retur sebagian memakai pembulatan kumulatif sehingga total tidak pernah melebihi yang dibayar.
+- **Pembatalan hanya di sesi yang sama.** Pembatalan dibatasi pada sesi kasir yang masih dibuka, tempat transaksi terjadi. Transaksi lain memakai retur. Dengan begitu rekap sesi yang sudah ditutup tidak berubah, dan pembatalan tidak dihitung dua kali pada kas seharusnya.
+- **Kasir boleh mencari transaksi kasir lain** dengan nomor faktur lengkap untuk melayani retur. Riwayat dan struk kasir lain tetap tertutup.
+- **Polling tidak memperpanjang sesi.** Permintaan berkala dari antarmuka (status pengajuan dan lencana menu) memakai header `X-Latar`, sehingga tidak memperpanjang sesi login dan keluar otomatis (KF-01) tetap berjalan.
+- **Batas diskon kasir** dihitung dengan bilangan bulat terhadap subtotal kotor: `diskon × 100 > kotor × batas`.

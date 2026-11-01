@@ -3,8 +3,9 @@ import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, pesanError } from '@/api'
 import KertasStruk from '@/components/KertasStruk.vue'
-import { rupiah } from '@/format'
-import type { Struk } from '@/types'
+import { namaJenisPengajuan, namaStatusPengajuan, rupiah } from '@/format'
+import type { FakturPengajuan, Pengajuan, Struk } from '@/types'
+import DialogPengajuan from '@/components/DialogPengajuan.vue'
 import UiHalaman from '@/components/ui/UiHalaman.vue'
 import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
 import UiPesan from '@/components/ui/UiPesan.vue'
@@ -35,6 +36,18 @@ onMounted(async () => {
 function cetak() {
   window.print()
 }
+
+// Pembatalan/retur/tukar untuk transaksi ini (KF-10).
+const faktur = ref<FakturPengajuan | null>(null)
+async function ajukan() {
+  if (!struk.value) return
+  galat.value = null
+  try {
+    faktur.value = await api.get<FakturPengajuan>(`/transaksi/faktur/${encodeURIComponent(struk.value.no_faktur)}`)
+  } catch (e) {
+    galat.value = pesanError(e)
+  }
+}
 </script>
 
 <template>
@@ -56,9 +69,22 @@ function cetak() {
           <UiTombol ref="tombolCetak" ukuran="besar" @click="cetak">Cetak struk</UiTombol>
           <UiTombol v-if="baru" to="/kasir" varian="kedua" ukuran="besar">Transaksi baru</UiTombol>
           <UiTombol v-else to="/riwayat" varian="kedua">Kembali ke riwayat</UiTombol>
+          <UiTombol v-if="struk.status === 'selesai'" varian="polos" @click="ajukan">Ajukan pembatalan, retur, atau tukar</UiTombol>
+          <ul v-if="struk.pengajuan.length" class="grid text-sm">
+            <li v-for="p in struk.pengajuan" :key="p.id_retur" class="flex justify-between gap-2 border-b border-garis py-1.5">
+              <RouterLink :to="`/pengajuan/${p.id_retur}`">{{ namaJenisPengajuan[p.jenis] }}</RouterLink>
+              <span class="text-redup">{{ namaStatusPengajuan[p.status] }}</span>
+            </li>
+          </ul>
           <p class="text-sm text-redup">Tanpa printer thermal, pilih “Simpan sebagai PDF” pada jendela cetak.</p>
         </div>
       </div>
     </template>
+    <DialogPengajuan
+      v-if="faktur"
+      :faktur="faktur"
+      @tutup="faktur = null"
+      @terkirim="(p: Pengajuan) => router.push(`/pengajuan/${p.id_retur}`)"
+    />
   </UiHalaman>
 </template>

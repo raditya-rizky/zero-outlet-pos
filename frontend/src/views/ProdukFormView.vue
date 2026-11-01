@@ -210,7 +210,9 @@ onMounted(async () => {
             <td><input v-model="v.warna" required aria-label="Warna" /></td>
             <td><input v-model="v.sku" placeholder="Otomatis" aria-label="SKU" /></td>
             <td class="text-right">
-              <span v-if="v.id_varian" class="tabular-nums">{{ v.stok }}</span>
+              <RouterLink v-if="v.id_varian" :to="`/admin/stok/kartu/${v.id_varian}`" class="tabular-nums" title="Lihat kartu stok">
+                {{ v.stok }}
+              </RouterLink>
               <input
                 v-else
                 v-model.number="v.stok_awal"

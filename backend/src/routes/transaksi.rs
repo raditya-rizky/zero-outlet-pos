@@ -9,10 +9,14 @@ use sqlx::PgConnection;
 use crate::{
     AppError, AppResult, AppState,
     middleware::auth::PenggunaLogin,
-    models::transaksi::{BuatTransaksi, CariTransaksi, InfoToko, ItemStruk, OpsiStruk, RingkasTransaksi, Struk},
+    models::{
+        pengajuan::RingkasPengajuan,
+        transaksi::{BuatTransaksi, CariTransaksi, InfoToko, ItemStruk, OpsiStruk, RingkasTransaksi, Struk},
+    },
     services::{
         hitung::{self, Baris},
         log::{self, Catatan},
+        pengaturan,
         stok::{self, Mutasi},
     },
 };
@@ -26,16 +30,19 @@ pub fn router() -> Router<AppState> {
 /// Menyimpan transaksi secara atomik: header, detail, pengurangan stok, kartu
 /// stok, dan log tersimpan bersama atau dibatalkan seluruhnya (Bab III.C.4).
 async fn buat(pengguna: PenggunaLogin, State(state): State<AppState>, Json(req): Json<BuatTransaksi>) -> AppResult<Json<Struk>> {
-    // Gabungkan varian yang sama dan urutkan berdasarkan id agar urutan
-    // penguncian baris konsisten antarkasir (mencegah deadlock).
-    let mut jumlah_per_varian: BTreeMap<i64, i32> = BTreeMap::new();
+    // Urutkan berdasarkan id varian agar urutan penguncian baris konsisten
+    // antarkasir (mencegah deadlock). Keranjang menyimpan satu baris per varian,
+    // sehingga varian ganda (beserta diskonnya) ditolak, bukan digabung.
+    let mut per_varian: BTreeMap<i64, (i32, i64)> = BTreeMap::new();
     for item in &req.items {
         if item.jumlah <= 0 {
             return Err(AppError::validasi("Jumlah barang harus lebih dari 0"));
         }
-        *jumlah_per_varian.entry(item.id_varian).or_default() += item.jumlah;
+        if per_varian.insert(item.id_varian, (item.jumlah, item.diskon_item)).is_some() {
+            return Err(AppError::validasi("Barang yang sama tercantum lebih dari sekali di keranjang"));
+        }
     }
-    if jumlah_per_varian.is_empty() {
+    if per_varian.is_empty() {
         return Err(AppError::validasi("Keranjang masih kosong"));
     }
 
@@ -49,7 +56,7 @@ async fn buat(pengguna: PenggunaLogin, State(state): State<AppState>, Json(req):
     .await?
     .ok_or_else(|| AppError::konflik("Buka sesi kasir terlebih dahulu sebelum melakukan transaksi"))?;
 
-    let ids: Vec<i64> = jumlah_per_varian.keys().copied().collect();
+    let ids: Vec<i64> = per_varian.keys().copied().collect();
     let data_varian = sqlx::query!(
         r#"SELECT v.id_varian, v.ukuran, v.warna, v.aktif AS varian_aktif,
                   p.nama, p.harga_jual, p.harga_beli, p.aktif AS produk_aktif
@@ -66,9 +73,10 @@ async fn buat(pengguna: PenggunaLogin, State(state): State<AppState>, Json(req):
         jumlah: i32,
         harga_satuan: i64,
         harga_pokok: i64,
+        diskon_item: i64,
     }
     let mut baris = Vec::with_capacity(ids.len());
-    for (&id_varian, &jumlah) in &jumlah_per_varian {
+    for (&id_varian, &(jumlah, diskon_item)) in &per_varian {
         let v = data_varian
             .iter()
             .find(|v| v.id_varian == id_varian)
@@ -82,13 +90,27 @@ async fn buat(pengguna: PenggunaLogin, State(state): State<AppState>, Json(req):
             jumlah,
             harga_satuan: v.harga_jual,
             harga_pokok: v.harga_beli,
+            diskon_item,
         });
     }
 
     // Harga selalu diambil dari basis data, bukan dari isian antarmuka.
-    let input_hitung: Vec<Baris> =
-        baris.iter().map(|b| Baris { jumlah: b.jumlah, harga_satuan: b.harga_satuan, diskon_item: 0 }).collect();
-    let rincian = hitung::hitung_transaksi(&input_hitung, 0, req.metode_bayar, req.bayar)?;
+    let input_hitung: Vec<Baris> = baris
+        .iter()
+        .map(|b| Baris { jumlah: b.jumlah, harga_satuan: b.harga_satuan, diskon_item: b.diskon_item })
+        .collect();
+    let rincian = hitung::hitung_transaksi(&input_hitung, req.diskon_transaksi, req.metode_bayar, req.bayar)?;
+
+    // Kasir hanya boleh memberi diskon sampai batas yang ditetapkan pemilik (KF-07).
+    let diskon_total = input_hitung.iter().map(|b| b.diskon_item).sum::<i64>() + rincian.diskon;
+    if !pengguna.is_admin() && diskon_total > 0 {
+        let batas = pengaturan::angka(&mut *tx, pengaturan::BATAS_DISKON_KASIR, 10).await?;
+        if hitung::melebihi_batas_diskon(diskon_total, hitung::kotor(&input_hitung), batas) {
+            return Err(AppError::validasi(format!(
+                "Diskon melebihi batas {batas}% untuk kasir. Kurangi diskon atau minta pemilik memprosesnya."
+            )));
+        }
+    }
 
     let no_faktur = sqlx::query_scalar!(
         r#"SELECT 'ZO-' || to_char(now() AT TIME ZONE $1, 'YYMMDD') || '-' || lpad(nextval('no_faktur_seq')::text, 6, '0') AS "no!""#,
@@ -116,13 +138,14 @@ async fn buat(pengguna: PenggunaLogin, State(state): State<AppState>, Json(req):
     for (b, subtotal) in baris.iter().zip(&rincian.subtotal_baris) {
         sqlx::query!(
             r#"INSERT INTO detail_transaksi (id_transaksi, id_varian, nama_barang, jumlah, harga_satuan, harga_pokok, diskon_item, subtotal)
-               VALUES ($1, $2, $3, $4, $5, $6, 0, $7)"#,
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"#,
             id_transaksi,
             b.id_varian,
             b.nama_barang,
             b.jumlah,
             b.harga_satuan,
             b.harga_pokok,
+            b.diskon_item,
             subtotal,
         )
         .execute(&mut *tx)
@@ -147,6 +170,8 @@ async fn buat(pengguna: PenggunaLogin, State(state): State<AppState>, Json(req):
         Catatan::new(pengguna.id_pengguna, "transaksi", "transaksi").id_objek(id_transaksi).baru(json!({
             "no_faktur": no_faktur,
             "total": rincian.total,
+            "diskon_transaksi": rincian.diskon,
+            "diskon_item": diskon_total - rincian.diskon,
             "metode_bayar": req.metode_bayar.as_str(),
             "jumlah_item": baris.len(),
         })),
@@ -172,8 +197,18 @@ async fn muat_struk(conn: &mut PgConnection, id_transaksi: i64, cetak_ulang: boo
 
     let items = sqlx::query_as!(
         ItemStruk,
-        r#"SELECT id_detail, id_varian, nama_barang, jumlah, harga_satuan, diskon_item, subtotal
-           FROM detail_transaksi WHERE id_transaksi = $1 ORDER BY id_detail"#,
+        r#"SELECT d.id_detail, d.id_varian, d.nama_barang, d.jumlah, d.harga_satuan, d.diskon_item, d.subtotal,
+                  coalesce((SELECT sum(dr.jumlah) FROM detail_retur dr JOIN retur r ON r.id_retur = dr.id_retur
+                            WHERE dr.id_detail = d.id_detail AND r.status = 'disetujui'), 0)::bigint AS "jumlah_diretur!"
+           FROM detail_transaksi d WHERE d.id_transaksi = $1 ORDER BY d.id_detail"#,
+        id_transaksi
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+
+    let pengajuan = sqlx::query_as!(
+        RingkasPengajuan,
+        "SELECT id_retur, jenis, status, total_pengembalian, tanggal_waktu FROM retur WHERE id_transaksi = $1 ORDER BY tanggal_waktu",
         id_transaksi
     )
     .fetch_all(&mut *conn)
@@ -206,6 +241,7 @@ async fn muat_struk(conn: &mut PgConnection, id_transaksi: i64, cetak_ulang: boo
         jumlah_cetak: t.jumlah_cetak,
         cetak_ulang,
         items,
+        pengajuan,
     })
 }
 

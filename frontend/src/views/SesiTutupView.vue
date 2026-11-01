@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { pesanError } from '@/api'
+import { api, pesanError } from '@/api'
 import { useSesi } from '@/stores/sesi'
 import { useKeranjang } from '@/stores/keranjang'
-import { parseRupiah, ribuan, rupiah, waktu } from '@/format'
-import type { Rekap } from '@/types'
+import { namaJenisPengajuan, parseRupiah, ribuan, rupiah, waktu } from '@/format'
+import type { Pengajuan, Rekap } from '@/types'
 import UiHalaman from '@/components/ui/UiHalaman.vue'
 import UiIsian from '@/components/ui/UiIsian.vue'
 import UiPesan from '@/components/ui/UiPesan.vue'
@@ -21,7 +21,31 @@ const galat = ref<string | null>(null)
 const memproses = ref(false)
 const hasil = ref<Rekap | null>(null)
 
-onMounted(() => sesi.muat().catch((e) => (galat.value = pesanError(e))))
+// Pengajuan yang belum diputuskan menahan penutupan sesi (KF-10, KF-19).
+const menunggu = ref<Pengajuan[]>([])
+
+async function muatMenunggu() {
+  const daftar = await api.get<Pengajuan[]>('/pengajuan', { status: 'menunggu' }).catch(() => [])
+  menunggu.value = daftar.filter((p) => p.id_sesi === sesi.aktif?.sesi.id_sesi)
+}
+
+async function tarik(p: Pengajuan) {
+  try {
+    await api.post(`/pengajuan/${p.id_retur}/tarik`)
+    await muatMenunggu()
+  } catch (e) {
+    galat.value = pesanError(e)
+  }
+}
+
+onMounted(async () => {
+  try {
+    await sesi.muat()
+    await muatMenunggu()
+  } catch (e) {
+    galat.value = pesanError(e)
+  }
+})
 
 const rekap = computed(() => hasil.value ?? sesi.aktif)
 const terisi = computed(() => kasFisik.value.trim() !== '')
@@ -98,6 +122,19 @@ async function tutup() {
           <UiTombol varian="kedua" @click="router.push('/riwayat')">Lihat riwayat</UiTombol>
         </div>
       </div>
+
+      <section v-else-if="menunggu.length" class="grid gap-2 border-t border-garis pt-8">
+        <h2>Pengajuan belum diputuskan</h2>
+        <p class="text-sm text-redup">
+          Sesi baru dapat ditutup setelah pemilik memutuskan pengajuan ini, atau setelah Anda menariknya.
+        </p>
+        <ul class="grid text-sm">
+          <li v-for="p in menunggu" :key="p.id_retur" class="flex flex-wrap items-center justify-between gap-2 border-b border-garis py-2">
+            <RouterLink :to="`/pengajuan/${p.id_retur}`">{{ namaJenisPengajuan[p.jenis] }} {{ p.no_faktur }}</RouterLink>
+            <UiTombol varian="bahaya" ukuran="kecil" @click="tarik(p)">Tarik</UiTombol>
+          </li>
+        </ul>
+      </section>
 
       <form v-else class="grid gap-4 border-t border-garis pt-8" @submit.prevent="tutup">
         <UiIsian label="Kas fisik yang dihitung" petunjuk="Hitung seluruh uang tunai di laci, termasuk modal awal.">

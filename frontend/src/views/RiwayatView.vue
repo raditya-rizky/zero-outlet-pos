@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { api, pesanError } from '@/api'
 import { useAuth } from '@/stores/auth'
-import { hariIni, namaMetode, rupiah, waktu } from '@/format'
-import type { Pengguna, RingkasTransaksi } from '@/types'
+import { hariIni, namaJenisPengajuan, namaMetode, namaStatusPengajuan, rupiah, sejak, waktu } from '@/format'
+import type { FakturPengajuan, Pengajuan, Pengguna, RingkasTransaksi } from '@/types'
+import DialogPengajuan from '@/components/DialogPengajuan.vue'
 import UiHalaman from '@/components/ui/UiHalaman.vue'
 import UiIsian from '@/components/ui/UiIsian.vue'
 import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
@@ -13,6 +15,33 @@ import UiTabel from '@/components/ui/UiTabel.vue'
 import UiTombol from '@/components/ui/UiTombol.vue'
 
 const auth = useAuth()
+const router = useRouter()
+
+// ---------- Retur/tukar dari struk pelanggan (KF-10) ----------
+const fakturDicari = ref('')
+const faktur = ref<FakturPengajuan | null>(null)
+const galatFaktur = ref<string | null>(null)
+const pengajuan = ref<Pengajuan[]>([])
+
+async function cariFaktur() {
+  galatFaktur.value = null
+  const no = fakturDicari.value.trim()
+  if (!no) return
+  try {
+    faktur.value = await api.get<FakturPengajuan>(`/transaksi/faktur/${encodeURIComponent(no)}`)
+  } catch (e) {
+    galatFaktur.value = pesanError(e)
+  }
+}
+
+function terkirim(p: Pengajuan) {
+  faktur.value = null
+  router.push(`/pengajuan/${p.id_retur}`)
+}
+
+function warnaStatus(s: Pengajuan['status']) {
+  return s === 'disetujui' ? 'aman' : s === 'ditolak' ? 'bahaya' : s === 'menunggu' ? 'waspada' : 'netral'
+}
 const noFaktur = ref('')
 const dari = ref(hariIni())
 const sampai = ref(hariIni())
@@ -41,6 +70,10 @@ async function muat() {
 
 onMounted(async () => {
   muat()
+  api
+    .get<Pengajuan[]>('/pengajuan')
+    .then((d) => (pengajuan.value = d.slice(0, 5)))
+    .catch(() => undefined)
   if (auth.isAdmin) kasir.value = await api.get<Pengguna[]>('/pengguna').catch(() => [])
 })
 </script>
@@ -53,7 +86,28 @@ onMounted(async () => {
       </template>
     </UiKepalaHalaman>
 
-    <form class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_160px]" @submit.prevent="muat">
+    <section class="grid gap-3">
+      <h2>Retur, tukar ukuran, atau pembatalan</h2>
+      <form class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_240px]" @submit.prevent="cariFaktur">
+        <UiIsian label="Nomor faktur pada struk pelanggan">
+          <input v-model="fakturDicari" placeholder="mis. ZO-261031-000012" autocapitalize="characters" />
+        </UiIsian>
+        <UiTombol varian="kedua" :disabled="!fakturDicari.trim()">Cari faktur</UiTombol>
+      </form>
+      <UiPesan v-if="galatFaktur" jenis="galat">{{ galatFaktur }}</UiPesan>
+
+      <ul v-if="pengajuan.length" class="grid text-sm" aria-label="Pengajuan terbaru">
+        <li v-for="p in pengajuan" :key="p.id_retur" class="flex flex-wrap items-center justify-between gap-2 border-b border-garis py-2">
+          <RouterLink :to="`/pengajuan/${p.id_retur}`">{{ namaJenisPengajuan[p.jenis] }} {{ p.no_faktur }}</RouterLink>
+          <span class="flex items-center gap-3">
+            <span class="text-redup">{{ sejak(p.tanggal_waktu) }}</span>
+            <UiLencana :warna="warnaStatus(p.status)">{{ namaStatusPengajuan[p.status] }}</UiLencana>
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <form class="flex flex-wrap items-end gap-3 border-t border-garis pt-8 [&>label]:flex-[1_1_160px]" @submit.prevent="muat">
       <UiIsian label="No. faktur"><input v-model="noFaktur" placeholder="mis. ZO-261024" /></UiIsian>
       <UiIsian label="Dari"><input v-model="dari" type="date" /></UiIsian>
       <UiIsian label="Sampai"><input v-model="sampai" type="date" /></UiIsian>
@@ -98,5 +152,6 @@ onMounted(async () => {
         </tr>
       </tbody>
     </UiTabel>
+    <DialogPengajuan v-if="faktur" :faktur="faktur" @tutup="faktur = null" @terkirim="terkirim" />
   </UiHalaman>
 </template>

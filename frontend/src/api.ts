@@ -27,13 +27,17 @@ function buatUrl(path: string, query?: Query) {
   return `/api${path}${qs ? `?${qs}` : ''}`
 }
 
-async function kirim<T>(method: string, path: string, body?: unknown, query?: Query): Promise<T> {
+async function kirim<T>(method: string, path: string, body?: unknown, query?: Query, latar = false): Promise<T> {
+  const headers: Record<string, string> = {}
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  // Polling latar tidak dihitung sebagai aktivitas, jadi tidak menunda keluar otomatis (KF-01).
+  if (latar) headers['X-Latar'] = '1'
   let res: Response
   try {
     res = await fetch(buatUrl(path, query), {
       method,
       credentials: 'same-origin',
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      headers,
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
@@ -50,6 +54,8 @@ async function kirim<T>(method: string, path: string, body?: unknown, query?: Qu
 
 export const api = {
   get: <T>(path: string, query?: Query) => kirim<T>('GET', path, undefined, query),
+  /** GET untuk polling berkala; tidak memperpanjang sesi login. */
+  latar: <T>(path: string, query?: Query) => kirim<T>('GET', path, undefined, query, true),
   post: <T>(path: string, body?: unknown) => kirim<T>('POST', path, body ?? {}),
   put: <T>(path: string, body: unknown) => kirim<T>('PUT', path, body),
   del: <T>(path: string) => kirim<T>('DELETE', path),

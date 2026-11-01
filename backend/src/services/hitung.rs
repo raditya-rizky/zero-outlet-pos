@@ -98,9 +98,84 @@ pub fn selisih_kas(kas_fisik: i64, kas_seharusnya: i64) -> i64 {
     kas_fisik - kas_seharusnya
 }
 
+/// Subtotal kotor (jumlah x harga) sebelum diskon apa pun; dasar batas diskon kasir.
+pub fn kotor(baris: &[Baris]) -> i64 {
+    baris.iter().map(|b| b.jumlah as i64 * b.harga_satuan).sum()
+}
+
+/// Apakah diskon melebihi `batas_persen` dari subtotal kotor (KF-07).
+/// Dihitung dengan bilangan bulat agar tepat pada batasnya.
+pub fn melebihi_batas_diskon(diskon: i64, kotor: i64, batas_persen: i64) -> bool {
+    diskon * 100 > kotor * batas_persen
+}
+
+/// Membagi diskon transaksi ke setiap baris sebanding subtotal barisnya.
+/// Sisa pembulatan diberikan ke baris dengan subtotal terbesar sehingga
+/// jumlah bagian selalu sama dengan diskon dan tidak ada baris bernilai negatif.
+pub fn bagi_diskon_transaksi(subtotal_baris: &[i64], diskon: i64) -> Vec<i64> {
+    let total: i64 = subtotal_baris.iter().sum();
+    if total <= 0 || diskon <= 0 {
+        return vec![0; subtotal_baris.len()];
+    }
+    let mut bagian: Vec<i64> = subtotal_baris.iter().map(|s| diskon * s / total).collect();
+    let sisa = diskon - bagian.iter().sum::<i64>();
+    if let Some((i, _)) = subtotal_baris.iter().enumerate().max_by_key(|(_, s)| **s) {
+        bagian[i] += sisa;
+    }
+    bagian
+}
+
+/// Nilai pengembalian untuk `q` unit dari satu baris yang dibayar `dibayar`
+/// untuk `jumlah` unit, bila `sudah` unit telah diretur sebelumnya. Pembulatan
+/// kumulatif membuat retur sebagian yang berulang berjumlah tepat `dibayar`.
+pub fn nilai_retur(dibayar: i64, jumlah: i32, sudah: i32, q: i32) -> i64 {
+    if jumlah <= 0 {
+        return 0;
+    }
+    let bagian = |k: i32| dibayar * k as i64 / jumlah as i64;
+    bagian(sudah + q) - bagian(sudah)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn batas_diskon_tepat_pada_batas() {
+        // 10% dari 300.000 = 30.000 masih boleh; 30.001 melebihi.
+        assert!(!melebihi_batas_diskon(30_000, 300_000, 10));
+        assert!(melebihi_batas_diskon(30_001, 300_000, 10));
+        assert!(!melebihi_batas_diskon(0, 0, 10));
+    }
+
+    #[test]
+    fn kotor_mengabaikan_diskon_item() {
+        let b = [Baris { jumlah: 2, harga_satuan: 50_000, diskon_item: 10_000 }, Baris { jumlah: 1, harga_satuan: 20_000, diskon_item: 0 }];
+        assert_eq!(kotor(&b), 120_000);
+    }
+
+    #[test]
+    fn bagi_diskon_berjumlah_tepat() {
+        let bagian = bagi_diskon_transaksi(&[100_000, 100_000, 100_000], 10_000);
+        assert_eq!(bagian.iter().sum::<i64>(), 10_000);
+        assert!(bagian.iter().all(|b| *b >= 3_333));
+        // Baris bernilai 0 tidak pernah menerima sisa pembulatan.
+        let bagian = bagi_diskon_transaksi(&[0, 70_000, 30_001], 1_001);
+        assert_eq!(bagian[0], 0);
+        assert_eq!(bagian.iter().sum::<i64>(), 1_001);
+        assert_eq!(bagi_diskon_transaksi(&[0, 0], 500), vec![0, 0]);
+    }
+
+    #[test]
+    fn retur_sebagian_berjumlah_tepat() {
+        // Baris 3 unit dibayar 100.000: retur satu per satu harus total 100.000.
+        let a = nilai_retur(100_000, 3, 0, 1);
+        let b = nilai_retur(100_000, 3, 1, 1);
+        let c = nilai_retur(100_000, 3, 2, 1);
+        assert_eq!(a + b + c, 100_000);
+        assert_eq!(nilai_retur(100_000, 3, 0, 3), 100_000);
+        assert_eq!(nilai_retur(100_000, 0, 0, 1), 0);
+    }
 
     fn baris(jumlah: i32, harga_satuan: i64) -> Baris {
         Baris { jumlah, harga_satuan, diskon_item: 0 }

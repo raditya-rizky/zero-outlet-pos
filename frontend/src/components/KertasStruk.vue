@@ -27,14 +27,22 @@ defineProps<{ struk: Struk }>()
         <div>{{ item.nama_barang }}</div>
         <div class="flex justify-between gap-2">
           <span>{{ item.jumlah }} x {{ ribuan(item.harga_satuan) }}</span>
-          <span>{{ ribuan(item.subtotal) }}</span>
+          <span>{{ ribuan(item.jumlah * item.harga_satuan) }}</span>
+        </div>
+        <div v-if="item.diskon_item" class="flex justify-between gap-2">
+          <span class="pl-2">Diskon</span>
+          <span>-{{ ribuan(item.diskon_item) }}</span>
+        </div>
+        <div v-if="item.jumlah_diretur" class="flex justify-between gap-2">
+          <span class="pl-2">Diretur {{ item.jumlah_diretur }}</span>
+          <span></span>
         </div>
       </div>
     </div>
     <hr class="my-1.5 border-dashed border-black" />
 
     <div class="flex justify-between gap-2"><span>Subtotal</span><span>{{ ribuan(struk.subtotal) }}</span></div>
-    <div v-if="struk.diskon" class="flex justify-between gap-2"><span>Diskon</span><span>-{{ ribuan(struk.diskon) }}</span></div>
+    <div v-if="struk.diskon" class="flex justify-between gap-2"><span>Diskon transaksi</span><span>-{{ ribuan(struk.diskon) }}</span></div>
     <div class="my-0.5 flex justify-between gap-2 text-[13px] font-bold"><span>TOTAL</span><span>{{ ribuan(struk.total) }}</span></div>
     <div class="flex justify-between gap-2"><span>{{ namaMetode[struk.metode_bayar] }}</span><span>{{ ribuan(struk.bayar) }}</span></div>
     <div v-if="struk.metode_bayar === 'tunai'" class="flex justify-between gap-2">

@@ -1,9 +1,12 @@
 //! Struktur data permintaan dan respons API.
 
 pub mod log;
+pub mod pengajuan;
+pub mod pengaturan;
 pub mod pengguna;
 pub mod produk;
 pub mod sesi;
+pub mod stok;
 pub mod transaksi;
 
 use serde::{Deserialize, Deserializer};

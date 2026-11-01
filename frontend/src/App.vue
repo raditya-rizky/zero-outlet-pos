@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/stores/auth'
 import { useSesi } from '@/stores/sesi'
 import { useKeranjang } from '@/stores/keranjang'
 import { hanyaJam } from '@/format'
+import { api } from '@/api'
+import type { Lencana } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,6 +19,31 @@ const tampilShell = computed(() => !!auth.pengguna && !route.meta.publik)
 const kelasNav =
   '-mb-px flex items-center border-b-2 border-transparent px-1 font-medium whitespace-nowrap text-redup no-underline hover:text-tinta'
 const kelasNavAktif = 'border-denim! text-tinta!'
+
+// Lencana menu pemilik: pengajuan menunggu dan stok menipis, diperbarui berkala
+// sebagai permintaan latar agar tidak menunda keluar otomatis (KF-01).
+const lencana = ref<Lencana | null>(null)
+let timerLencana: ReturnType<typeof setInterval> | undefined
+
+async function muatLencana() {
+  if (!auth.isAdmin) return
+  lencana.value = await api.latar<Lencana>('/ringkasan/lencana').catch(() => lencana.value)
+}
+
+watch(
+  () => auth.isAdmin,
+  (admin) => {
+    clearInterval(timerLencana)
+    lencana.value = null
+    if (admin) {
+      muatLencana()
+      timerLencana = setInterval(muatLencana, 30_000)
+    }
+  },
+  { immediate: true },
+)
+watch(() => route.fullPath, muatLencana)
+onBeforeUnmount(() => clearInterval(timerLencana))
 
 async function keluar() {
   await auth.logout()
@@ -47,10 +74,31 @@ async function keluar() {
       <RouterLink to="/kasir" :class="kelasNav" :active-class="kelasNavAktif">Kasir</RouterLink>
       <RouterLink to="/riwayat" :class="kelasNav" :active-class="kelasNavAktif">Riwayat</RouterLink>
       <template v-if="auth.isAdmin">
+        <RouterLink to="/admin/persetujuan" :class="kelasNav" :active-class="kelasNavAktif">
+          Persetujuan
+          <span
+            v-if="lencana?.pengajuan_menunggu"
+            class="ml-1.5 rounded-full bg-bahaya px-1.5 text-xs leading-5 text-white tabular-nums"
+            :aria-label="`${lencana.pengajuan_menunggu} menunggu`"
+          >
+            {{ lencana.pengajuan_menunggu }}
+          </span>
+        </RouterLink>
         <RouterLink to="/admin/produk" :class="kelasNav" :active-class="kelasNavAktif">Produk</RouterLink>
+        <RouterLink to="/admin/stok" :class="kelasNav" :active-class="kelasNavAktif">
+          Stok
+          <span
+            v-if="lencana?.stok_menipis"
+            class="ml-1.5 rounded-full bg-waspada-terang px-1.5 text-xs leading-5 text-waspada tabular-nums"
+            :aria-label="`${lencana.stok_menipis} varian menipis`"
+          >
+            {{ lencana.stok_menipis }}
+          </span>
+        </RouterLink>
         <RouterLink to="/admin/sesi" :class="kelasNav" :active-class="kelasNavAktif">Sesi kasir</RouterLink>
         <RouterLink to="/admin/pengguna" :class="kelasNav" :active-class="kelasNavAktif">Pengguna</RouterLink>
         <RouterLink to="/admin/log" :class="kelasNav" :active-class="kelasNavAktif">Log aktivitas</RouterLink>
+        <RouterLink to="/admin/pengaturan" :class="kelasNav" :active-class="kelasNavAktif">Pengaturan</RouterLink>
       </template>
     </nav>
 

@@ -4,17 +4,26 @@ import { useRouter } from 'vue-router'
 import { api, ApiError, pesanError } from '@/api'
 import { useKeranjang } from '@/stores/keranjang'
 import { useSesi } from '@/stores/sesi'
+import { useAuth } from '@/stores/auth'
 import { parseRupiah, ribuan, rupiah } from '@/format'
 import LabelHarga from '@/components/LabelHarga.vue'
 import DialogModal from '@/components/DialogModal.vue'
 import UiPesan from '@/components/ui/UiPesan.vue'
 import UiTombol from '@/components/ui/UiTombol.vue'
 import UiIsian from '@/components/ui/UiIsian.vue'
-import type { MetodeBayar, Produk, Struk, Varian } from '@/types'
+import IsianDiskon from '@/components/IsianDiskon.vue'
+import type { MetodeBayar, Pengaturan, Produk, Struk, Varian } from '@/types'
 
 const router = useRouter()
 const keranjang = useKeranjang()
 const sesi = useSesi()
+const auth = useAuth()
+
+// ---------- Diskon (KF-07) ----------
+const batasDiskon = ref(10)
+const diskonTerbuka = ref<number | null>(null)
+/** Kasir dibatasi persen dari subtotal kotor; pemilik/admin tidak. */
+const lewatBatas = computed(() => !auth.isAdmin && keranjang.melebihiBatas(batasDiskon.value))
 
 // ---------- Pencarian produk (KF-05) ----------
 const cari = ref('')
@@ -78,7 +87,11 @@ const isianUang = ref<HTMLInputElement>()
 const diterima = computed(() => parseRupiah(uangDiterima.value))
 const kembalian = computed(() => diterima.value - keranjang.total)
 const bisaSimpan = computed(
-  () => keranjang.items.length > 0 && !menyimpan.value && (metode.value !== 'tunai' || kembalian.value >= 0),
+  () =>
+    keranjang.items.length > 0 &&
+    !menyimpan.value &&
+    !lewatBatas.value &&
+    (metode.value !== 'tunai' || kembalian.value >= 0),
 )
 
 /** Nominal uang yang lazim diterima: uang pas lalu pembulatan ke atas. */
@@ -107,7 +120,7 @@ async function simpan() {
   galatBayar.value = null
   try {
     const struk = await api.post<Struk>('/transaksi', {
-      items: keranjang.items.map((i) => ({ id_varian: i.id_varian, jumlah: i.jumlah })),
+      ...keranjang.muatan(),
       metode_bayar: metode.value,
       bayar: metode.value === 'tunai' ? diterima.value : null,
     })
@@ -138,6 +151,10 @@ function pintasan(e: KeyboardEvent) {
 
 onMounted(() => {
   muatProduk()
+  api
+    .get<Pengaturan>('/pengaturan')
+    .then((p) => (batasDiskon.value = p.batas_diskon_kasir_persen))
+    .catch(() => undefined)
   window.addEventListener('keydown', pintasan)
 })
 onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
@@ -253,7 +270,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
                 +
               </button>
             </div>
-            <span class="ml-auto font-bold tabular-nums">{{ ribuan(item.jumlah * item.harga) }}</span>
+            <span class="ml-auto grid text-right">
+              <span class="font-bold tabular-nums">{{ ribuan(keranjang.subtotalBaris(item)) }}</span>
+              <span v-if="keranjang.diskonBaris(item)" class="text-xs text-redup tabular-nums">
+                diskon {{ ribuan(keranjang.diskonBaris(item)) }}
+              </span>
+            </span>
             <button
               type="button"
               class="size-9 rounded-kecil text-[1.4rem] leading-none text-redup hover:text-bahaya"
@@ -263,10 +285,29 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
               ×
             </button>
           </div>
+          <div v-if="diskonTerbuka === item.id_varian" class="flex flex-wrap items-center gap-2">
+            <IsianDiskon v-model="item.diskon" :label="`Diskon ${item.nama}`" />
+            <UiTombol varian="polos" ukuran="kecil" class="text-sm" @click="diskonTerbuka = null">Selesai</UiTombol>
+          </div>
+          <button
+            v-else
+            type="button"
+            class="justify-self-start text-sm text-redup hover:text-denim"
+            @click="diskonTerbuka = item.id_varian"
+          >
+            {{ keranjang.diskonBaris(item) ? 'Ubah diskon' : 'Beri diskon' }}
+          </button>
         </li>
       </ul>
 
       <footer class="grid gap-3 pt-2 max-[859px]:sticky max-[859px]:bottom-0 max-[859px]:bg-white max-[859px]:pb-3">
+        <p v-if="keranjang.diskonTotal" class="flex justify-between text-sm text-redup">
+          <span>Subtotal {{ rupiah(keranjang.kotor) }}, diskon</span>
+          <span class="tabular-nums">−{{ rupiah(keranjang.diskonTotal) }}</span>
+        </p>
+        <UiPesan v-if="lewatBatas" jenis="galat">
+          Diskon melebihi batas {{ batasDiskon }}% untuk kasir. Kurangi diskon atau minta pemilik memprosesnya.
+        </UiPesan>
         <LabelHarga :nilai="keranjang.total" :keterangan="`Total ${keranjang.jumlahBarang} barang`" />
         <UiTombol ukuran="besar" :disabled="!keranjang.items.length" @click="bukaBayar">
           Bayar <span class="rounded-[4px] bg-white/20 px-1.5 py-px text-[0.8rem]">F2</span>
@@ -277,6 +318,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', pintasan))
     <DialogModal v-if="dialogBayar" judul="Pembayaran" @tutup="dialogBayar = false">
       <form class="grid gap-4" @submit.prevent="simpan">
         <LabelHarga :nilai="keranjang.total" keterangan="Total belanja" />
+
+        <div class="grid gap-1.5">
+          <span class="text-[0.9rem] font-semibold">Diskon transaksi</span>
+          <IsianDiskon v-model="keranjang.diskonTransaksi" label="Diskon transaksi" />
+          <small v-if="!auth.isAdmin" class="text-[0.8rem] text-redup">
+            Total diskon kasir maksimal {{ batasDiskon }}% dari subtotal {{ rupiah(keranjang.kotor) }}.
+          </small>
+          <UiPesan v-if="lewatBatas" jenis="galat">Diskon melebihi batas {{ batasDiskon }}% untuk kasir.</UiPesan>
+        </div>
 
         <fieldset class="grid grid-cols-3 gap-2">
           <legend class="mb-1.5 text-sm text-redup">Metode pembayaran</legend>

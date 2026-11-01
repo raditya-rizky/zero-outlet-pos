@@ -13,6 +13,8 @@ use sha2::{Digest, Sha256};
 use crate::{AppError, AppState};
 
 pub const NAMA_COOKIE: &str = "zo_sesi";
+/// Penanda permintaan latar dari antarmuka (polling), nilainya "1".
+pub const HEADER_LATAR: &str = "x-latar";
 
 #[derive(Debug, Clone, Serialize)]
 pub struct PenggunaLogin {
@@ -49,21 +51,40 @@ impl FromRequestParts<AppState> for PenggunaLogin {
         let jar = CookieJar::from_headers(&parts.headers);
         let token = jar.get(NAMA_COOKIE).map(|c| c.value().to_owned()).ok_or_else(AppError::belum_login)?;
 
-        // Sekaligus memeriksa batas waktu tidak aktif dan memperbarui waktu aktivitas terakhir.
-        let pengguna = sqlx::query_as!(
-            PenggunaLogin,
-            r#"UPDATE sesi_login s SET terakhir_aktif = now()
-               FROM pengguna p
-               WHERE s.token_hash = $1
-                 AND p.id_pengguna = s.id_pengguna
-                 AND p.aktif
-                 AND s.terakhir_aktif > now() - make_interval(mins => $2)
-               RETURNING p.id_pengguna, p.nama, p.username, p.peran"#,
-            hash_token(&token),
-            state.config.session_idle_minutes,
-        )
-        .fetch_optional(&state.pool)
-        .await?;
+        // Permintaan latar (polling status dan lencana) tidak dihitung sebagai aktivitas,
+        // agar tab yang dibiarkan terbuka tetap keluar otomatis (KF-01).
+        let latar = parts.headers.get(HEADER_LATAR).is_some_and(|v| v == "1");
+
+        let pengguna = if latar {
+            sqlx::query_as!(
+                PenggunaLogin,
+                r#"SELECT p.id_pengguna, p.nama, p.username, p.peran
+                   FROM sesi_login s JOIN pengguna p ON p.id_pengguna = s.id_pengguna
+                   WHERE s.token_hash = $1
+                     AND p.aktif
+                     AND s.terakhir_aktif > now() - make_interval(mins => $2)"#,
+                hash_token(&token),
+                state.config.session_idle_minutes,
+            )
+            .fetch_optional(&state.pool)
+            .await?
+        } else {
+            // Sekaligus memeriksa batas waktu tidak aktif dan memperbarui waktu aktivitas terakhir.
+            sqlx::query_as!(
+                PenggunaLogin,
+                r#"UPDATE sesi_login s SET terakhir_aktif = now()
+                   FROM pengguna p
+                   WHERE s.token_hash = $1
+                     AND p.id_pengguna = s.id_pengguna
+                     AND p.aktif
+                     AND s.terakhir_aktif > now() - make_interval(mins => $2)
+                   RETURNING p.id_pengguna, p.nama, p.username, p.peran"#,
+                hash_token(&token),
+                state.config.session_idle_minutes,
+            )
+            .fetch_optional(&state.pool)
+            .await?
+        };
 
         pengguna.ok_or_else(|| AppError::TidakTerautentikasi("Sesi login telah berakhir. Silakan login kembali.".into()))
     }

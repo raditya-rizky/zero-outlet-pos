@@ -25,3 +25,34 @@ export function hariIni(): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
+
+/** Waktu relatif singkat, misalnya "5 menit lalu". */
+export function sejak(iso: string): string {
+  const detik = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000))
+  if (detik < 60) return 'baru saja'
+  const menit = Math.floor(detik / 60)
+  if (menit < 60) return `${menit} menit lalu`
+  const jamLalu = Math.floor(menit / 60)
+  if (jamLalu < 24) return `${jamLalu} jam lalu`
+  return `${Math.floor(jamLalu / 24)} hari lalu`
+}
+
+export const namaJenisPengajuan: Record<string, string> = {
+  batal: 'Pembatalan',
+  retur: 'Retur',
+  tukar: 'Tukar ukuran',
+}
+
+export const namaStatusPengajuan: Record<string, string> = {
+  menunggu: 'Menunggu persetujuan',
+  disetujui: 'Disetujui',
+  ditolak: 'Ditolak',
+  dibatalkan: 'Ditarik',
+}
+
+/** Nilai retur sebagian; sama dengan hitung::nilai_retur di backend. */
+export function nilaiRetur(dibayar: number, jumlah: number, sudah: number, q: number): number {
+  if (jumlah <= 0) return 0
+  const bagian = (k: number) => Math.floor((dibayar * k) / jumlah)
+  return bagian(sudah + q) - bagian(sudah)
+}

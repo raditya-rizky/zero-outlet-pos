@@ -27,7 +27,15 @@ impl Klien {
     }
 
     pub async fn kirim(&self, method: Method, uri: &str, body: Option<Value>) -> (StatusCode, Value) {
+        self.kirim_dengan(method, uri, body, false).await
+    }
+
+    /// Seperti `kirim`; dengan `latar = true` meniru polling antarmuka (header X-Latar).
+    pub async fn kirim_dengan(&self, method: Method, uri: &str, body: Option<Value>, latar: bool) -> (StatusCode, Value) {
         let mut req = Request::builder().method(method).uri(uri);
+        if latar {
+            req = req.header("x-latar", "1");
+        }
         if let Some(c) = &self.cookie {
             req = req.header(header::COOKIE, c);
         }
