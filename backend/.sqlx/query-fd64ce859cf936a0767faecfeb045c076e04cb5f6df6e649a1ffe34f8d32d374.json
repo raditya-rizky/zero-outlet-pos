@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE sesi_kasir SET waktu_tutup = waktu_buka + interval '12 hours', kas_fisik = $2, kas_seharusnya = $2, selisih = 0\n               WHERE id_sesi = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd64ce859cf936a0767faecfeb045c076e04cb5f6df6e649a1ffe34f8d32d374"
+}

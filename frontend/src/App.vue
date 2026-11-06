@@ -19,6 +19,8 @@ const tampilShell = computed(() => !!auth.pengguna && !route.meta.publik)
 const kelasNav =
   '-mb-px flex items-center border-b-2 border-transparent px-1 font-medium whitespace-nowrap text-redup no-underline hover:text-tinta'
 const kelasNavAktif = 'border-denim! text-tinta!'
+// Menu yang mewakili beberapa halaman (sub-menu) aktif berdasarkan awalan rute.
+const aktifPada = (...awalan: string[]) => (awalan.some((a) => route.path.startsWith(a)) ? kelasNavAktif : '')
 
 // Lencana menu pemilik: pengajuan menunggu dan stok menipis, diperbarui berkala
 // sebagai permintaan latar agar tidak menunda keluar otomatis (KF-01).
@@ -71,8 +73,10 @@ async function keluar() {
     </RouterLink>
 
     <nav class="flex flex-1 gap-6 overflow-x-auto [scrollbar-width:none] max-md:order-3 max-md:basis-full max-md:min-h-11" aria-label="Menu utama">
+      <RouterLink v-if="auth.isAdmin" to="/admin/dasbor" :class="kelasNav" :active-class="kelasNavAktif">Dasbor</RouterLink>
       <RouterLink to="/kasir" :class="kelasNav" :active-class="kelasNavAktif">Kasir</RouterLink>
       <RouterLink to="/riwayat" :class="kelasNav" :active-class="kelasNavAktif">Riwayat</RouterLink>
+      <RouterLink v-if="!auth.isAdmin" to="/laporan" :class="kelasNav" :active-class="kelasNavAktif">Laporan</RouterLink>
       <template v-if="auth.isAdmin">
         <RouterLink to="/admin/persetujuan" :class="kelasNav" :active-class="kelasNavAktif">
           Persetujuan
@@ -95,10 +99,10 @@ async function keluar() {
             {{ lencana.stok_menipis }}
           </span>
         </RouterLink>
-        <RouterLink to="/admin/sesi" :class="kelasNav" :active-class="kelasNavAktif">Sesi kasir</RouterLink>
-        <RouterLink to="/admin/pengguna" :class="kelasNav" :active-class="kelasNavAktif">Pengguna</RouterLink>
-        <RouterLink to="/admin/log" :class="kelasNav" :active-class="kelasNavAktif">Log aktivitas</RouterLink>
-        <RouterLink to="/admin/pengaturan" :class="kelasNav" :active-class="kelasNavAktif">Pengaturan</RouterLink>
+        <RouterLink to="/laporan" :class="[kelasNav, aktifPada('/laporan', '/admin/laporan', '/admin/sesi')]">Laporan</RouterLink>
+        <RouterLink to="/admin/pengaturan" :class="[kelasNav, aktifPada('/admin/pengaturan', '/admin/pengguna', '/admin/log')]">
+          Pengaturan
+        </RouterLink>
       </template>
     </nav>
 

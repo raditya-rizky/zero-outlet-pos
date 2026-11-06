@@ -140,11 +140,15 @@
   }
 }
 
-/* Struk dicetak pada kertas thermal 58 mm (KF-09). */
+/*
+ * Cetak: laporan memakai A4 (KF-16). Halaman struk menimpa aturan ini dengan
+ * ukuran 58 mm x tinggi struk saat dibuka (lihat StrukView.vue), karena
+ * "58mm auto" bukan nilai `size` yang sah dan diabaikan peramban.
+ */
 @media print {
   @page {
-    size: 58mm auto;
-    margin: 0;
+    size: A4;
+    margin: 12mm;
   }
   body {
     background: #fff;

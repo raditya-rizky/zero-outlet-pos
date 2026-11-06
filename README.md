@@ -9,7 +9,7 @@ Capstone Project STSI4440 Kelompok D, Universitas Terbuka.
 
 Backend juga menyajikan hasil build frontend, sehingga di komputer toko hanya perlu satu program server dan satu basis data.
 
-## Status: siklus prototipe 2
+## Status: siklus prototipe 3 (semua KF-01 sampai KF-20)
 
 | Kebutuhan | Fitur | Status |
 | --- | --- | --- |
@@ -27,7 +27,11 @@ Backend juga menyajikan hasil build frontend, sehingga di komputer toko hanya pe
 | KF-12 | Stok opname dengan alasan wajib dan ringkasan akurasi | Selesai (siklus 2) |
 | KF-13 | Kartu stok per varian | Selesai (siklus 2) |
 | KF-14 | Peringatan stok menipis dan daftar lambat terjual, lencana menu | Selesai (siklus 2) |
-| KF-15–KF-18 | Laporan penjualan, ekspor, biaya, laba rugi | Siklus 3 (tabel sudah disiapkan) |
+| KF-15 | Laporan penjualan harian/mingguan/bulanan, rincian per produk, kategori, ukuran, kasir, dan metode bayar, terlaris, grafik tren | Selesai (siklus 3) |
+| KF-16 | Ekspor CSV (penjualan, laba rugi, stok) dan cetak/simpan PDF (A4) | Selesai (siklus 3) |
+| KF-17 | Biaya operasional per tanggal dan kategori | Selesai (siklus 3) |
+| KF-18 | Laba rugi sederhana dengan pembanding periode sebelumnya | Selesai (siklus 3) |
+| Tabel 21 | Dasbor pemilik sebagai halaman awal admin | Selesai (siklus 3) |
 
 ## Menjalankan untuk pengembangan
 
@@ -87,7 +91,28 @@ Uji integrasi siklus 2 ada di `backend/tests/siklus2.rs`:
 - barang masuk dan perubahan harga beli, kartu stok, serta daftar lambat terjual
 - polling tidak memperpanjang sesi login
 
+Uji integrasi siklus 3 ada di `backend/tests/siklus3.rs`:
+- satu skenario laba rugi Oktober-November 2025 yang setiap angkanya dihitung manual, mencakup diskon baris dan diskon transaksi, transaksi batal, retur yang disetujui pada bulan berikutnya, tukar ukuran, dan biaya
+- rincian per produk berjumlah tepat dan sama dengan dasar nilai retur
+- kasir hanya melihat penjualannya sendiri
+- format CSV, termasuk penetralan rumus lembar kerja
+- validasi biaya dan dasbor
+
 Ada juga uji dua kasir yang menjual unit terakhir secara bersamaan. Setiap uji memakai basis data sementara yang dibuat otomatis oleh `#[sqlx::test]`.
+
+### Uji kinerja laporan (Tabel 1: laporan bulanan ≤ 5 detik)
+
+`seed --riwayat <hari>` membuat riwayat penjualan **sintetis** (sekitar 40 transaksi per hari) dan hanya mau berjalan pada basis data yang namanya mengandung `_uji`. Data ini memakai kasir "Data Contoh (sintetis)" dan faktur berawalan `UJI-`. Jangan pernah dilaporkan sebagai data nyata Zero Outlet.
+
+```bash
+docker exec zero-outlet-pos-db-1 createdb -U zero zero_outlet_pos_uji
+cd backend
+DATABASE_URL=postgres://zero:zero@localhost:5432/zero_outlet_pos_uji cargo run --bin seed
+DATABASE_URL=postgres://zero:zero@localhost:5432/zero_outlet_pos_uji cargo run --bin seed -- --riwayat 90
+DATABASE_URL=postgres://zero:zero@localhost:5432/zero_outlet_pos_uji BIND_ADDR=127.0.0.1:3001 cargo run
+```
+
+Lalu login ke `http://127.0.0.1:3001` dan buka laporan satu bulan. Pengukuran pengembang pada 3.603 transaksi sintetis (90 hari, build debug, laptop pengembang): laporan penjualan bulanan (1.201 transaksi) 0,02–0,04 detik, laba rugi bulanan 0,01 detik. Angka resmi untuk Bab IV tetap diukur ulang di komputer toko dengan data nyata.
 
 ## Pemasangan di komputer toko (mode lokal)
 
@@ -113,13 +138,13 @@ cd backend && cargo sqlx prepare -- --all-targets
 ```
 backend/
   migrations/      skrip SQL per modul (berjalan otomatis saat server start)
-  src/routes/      endpoint: auth, pengguna, produk, sesi, transaksi, pengajuan, barang_masuk, stok, pengaturan, log
-  src/services/    hitung (uang, diskon, nilai retur), stok (mutasi + kartu stok), log, pengaturan, sandi
+  src/routes/      endpoint: auth, pengguna, produk, sesi, transaksi, pengajuan, barang_masuk, stok, laporan, biaya, pengaturan, log
+  src/services/    hitung (uang, diskon, nilai retur), periode (periode pembanding, margin), stok, log, pengaturan, sandi
   src/middleware/  autentikasi cookie dan otorisasi peran
-  src/bin/seed.rs  data contoh sintetis
+  src/bin/seed.rs  data contoh sintetis; --riwayat untuk uji kinerja (basis data _uji saja)
   tests/           uji integrasi API
 frontend/src/
-  views/           halaman (Kasir, Struk, Riwayat, Pengajuan, Sesi, Persetujuan, Produk, Stok, Pengguna, Log, Pengaturan)
+  views/           halaman (Dasbor, Kasir, Struk, Riwayat, Pengajuan, Sesi, Persetujuan, Produk, Stok, Laporan, Laba rugi, Biaya, Pengguna, Log, Pengaturan)
   stores/          auth, sesi kasir, keranjang
   components/      label harga, dialog, kertas struk
   components/ui/   komponen dasar Tailwind (tombol, isian, pesan, lencana, tabel, kerangka halaman)
@@ -149,3 +174,18 @@ frontend/src/
 - **Kasir boleh mencari transaksi kasir lain** dengan nomor faktur lengkap untuk melayani retur. Riwayat dan struk kasir lain tetap tertutup.
 - **Polling tidak memperpanjang sesi.** Permintaan berkala dari antarmuka (status pengajuan dan lencana menu) memakai header `X-Latar`, sehingga tidak memperpanjang sesi login dan keluar otomatis (KF-01) tetap berjalan.
 - **Batas diskon kasir** dihitung dengan bilangan bulat terhadap subtotal kotor: `diskon × 100 > kotor × batas`.
+- **Siklus 3, aturan angka laporan:**
+  - Penjualan hanya dari transaksi berstatus `selesai`.
+  - Penjualan bersih = kotor − diskon − retur, sehingga sama dengan total transaksi dikurangi retur.
+  - **Retur dihitung pada tanggal disetujui**, bukan tanggal penjualan asal. Laporan periode yang sudah lewat tidak berubah, dan angkanya cocok dengan rekap kas sesi. Hanya pembatalan yang bisa mengubah hari sebelumnya, dan itu pun hanya bila sesi kasir melewati tengah malam.
+  - Tukar ukuran tidak memengaruhi penjualan maupun HPP, karena ditukar dalam produk yang sama dengan harga yang sama.
+  - HPP = harga pokok saat terjual dikurangi harga pokok barang yang diretur.
+  - Margin disimpan dalam basis poin (bilangan bulat) dan kosong bila penjualan bersih nol atau minus.
+- **Rincian per produk/kategori/ukuran membagi diskon transaksi** dengan cara yang sama persis dengan perhitungan nilai retur (bagian proporsional, sisa ke baris bernilai terbesar). Jumlah rincian sama tepat dengan total penjualan.
+- **Retur pada laporan per kasir** mengurangi angka kasir yang menjual transaksi asalnya, bukan kasir yang memproses retur.
+- **Periode pembanding laba rugi:**
+  - Bulan penuh dibandingkan bulan penuh sebelumnya.
+  - "Bulan ini sejauh ini" dibandingkan tanggal yang sama pada bulan lalu.
+  - Rentang lain dibandingkan jumlah hari yang sama tepat sebelumnya.
+- **CSV** memakai UTF-8 dengan BOM, pemisah `;`, dan angka tanpa titik ribuan, agar langsung terbaca Excel berbahasa Indonesia. Teks yang diawali `= + - @` diberi tanda kutip agar tidak dijalankan sebagai rumus.
+- **Perbaikan cetak struk:** aturan lama `@page { size: 58mm auto }` tidak sah sehingga diabaikan peramban, dan struk tercetak pada ukuran kertas bawaan (Letter/A4). Sekarang laporan memakai A4, sedangkan halaman struk menetapkan ukuran 58 mm × tinggi struk saat dibuka. Hasilnya diuji lewat PDF (58 × 84 mm untuk struk contoh).

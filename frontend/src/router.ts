@@ -36,6 +36,11 @@ export const router = createRouter({
     { path: '/admin/stok/opname', component: () => import('@/views/StokOpnameView.vue'), meta: { admin: true, judul: 'Stok opname' } },
     { path: '/admin/stok/kartu/:id', component: () => import('@/views/KartuStokView.vue'), props: true, meta: { admin: true, judul: 'Kartu stok' } },
     { path: '/admin/pengaturan', component: () => import('@/views/PengaturanView.vue'), meta: { admin: true, judul: 'Pengaturan' } },
+    { path: '/admin/dasbor', component: () => import('@/views/DasborView.vue'), meta: { admin: true, judul: 'Dasbor' } },
+    { path: '/laporan', component: () => import('@/views/LaporanPenjualanView.vue'), meta: { judul: 'Laporan penjualan' } },
+    { path: '/admin/laporan/laba-rugi', component: () => import('@/views/LabaRugiView.vue'), meta: { admin: true, judul: 'Laba rugi' } },
+    { path: '/admin/laporan/biaya', component: () => import('@/views/BiayaView.vue'), meta: { admin: true, judul: 'Biaya operasional' } },
+    { path: '/admin/laporan/stok', component: () => import('@/views/LaporanStokView.vue'), meta: { admin: true, judul: 'Laporan stok' } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })
@@ -46,7 +51,7 @@ router.beforeEach(async (to) => {
 
   if (to.meta.publik) return auth.pengguna ? '/' : true
   if (!auth.pengguna) return { path: '/login', query: to.fullPath !== '/' ? { lanjut: to.fullPath } : {} }
-  if (to.path === '/') return auth.isAdmin ? '/admin/produk' : '/kasir'
+  if (to.path === '/') return auth.isAdmin ? '/admin/dasbor' : '/kasir'
   if (to.meta.admin && !auth.isAdmin) return '/kasir'
 
   if (to.meta.butuhSesi) {

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM biaya_operasional WHERE id_biaya = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ea02644e4b544f210c9ccf33c4c4d970d2eed86572fb76d8a42295217a7a636c"
+}

@@ -52,7 +52,30 @@ async function kirim<T>(method: string, path: string, body?: unknown, query?: Qu
   return data as T
 }
 
+/** Mengunduh berkas (mis. CSV) dengan cookie sesi; nama berkas dari Content-Disposition. */
+async function unduh(path: string, query?: Query): Promise<void> {
+  let res: Response
+  try {
+    res = await fetch(buatUrl(path, query), { credentials: 'same-origin' })
+  } catch {
+    throw new ApiError(0, 'Tidak dapat terhubung ke server. Periksa jaringan atau komputer server toko.')
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => null)
+    if (res.status === 401) saatTidakTerautentikasi?.()
+    throw new ApiError(res.status, data?.pesan ?? `Unduhan gagal (${res.status})`)
+  }
+  const nama = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') ?? '')?.[1] ?? 'unduhan.csv'
+  const url = URL.createObjectURL(await res.blob())
+  const a = Object.assign(document.createElement('a'), { href: url, download: nama })
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
 export const api = {
+  unduh,
   get: <T>(path: string, query?: Query) => kirim<T>('GET', path, undefined, query),
   /** GET untuk polling berkala; tidak memperpanjang sesi login. */
   latar: <T>(path: string, query?: Query) => kirim<T>('GET', path, undefined, query, true),

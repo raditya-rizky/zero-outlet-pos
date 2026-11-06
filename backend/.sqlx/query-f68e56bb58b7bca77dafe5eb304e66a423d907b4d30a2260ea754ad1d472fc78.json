@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE biaya_operasional SET tanggal = $2, kategori = $3, nominal = $4, keterangan = $5 WHERE id_biaya = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Date",
+        "Text",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f68e56bb58b7bca77dafe5eb304e66a423d907b4d30a2260ea754ad1d472fc78"
+}

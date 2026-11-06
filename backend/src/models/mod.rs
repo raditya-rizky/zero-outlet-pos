@@ -1,5 +1,7 @@
 //! Struktur data permintaan dan respons API.
 
+pub mod biaya;
+pub mod laporan;
 pub mod log;
 pub mod pengajuan;
 pub mod pengaturan;

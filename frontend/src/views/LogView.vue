@@ -10,6 +10,7 @@ import UiLencana from '@/components/ui/UiLencana.vue'
 import UiPesan from '@/components/ui/UiPesan.vue'
 import UiTabel from '@/components/ui/UiTabel.vue'
 import UiTombol from '@/components/ui/UiTombol.vue'
+import NavPengaturan from '@/components/NavPengaturan.vue'
 
 const AKSI: Record<string, string> = {
   login: 'Login',
@@ -82,6 +83,7 @@ onMounted(async () => {
     <UiKepalaHalaman judul="Log aktivitas">
       <template #deskripsi>Jejak siapa melakukan apa dan kapan. Log hanya dapat dibaca; tidak ada yang dapat mengubah atau menghapusnya.</template>
     </UiKepalaHalaman>
+    <NavPengaturan />
 
     <form class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_160px]" @submit.prevent="muat(1)">
       <UiIsian label="Pengguna">

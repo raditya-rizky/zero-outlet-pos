@@ -82,7 +82,12 @@ async fn isi_pengguna(pool: &PgPool) -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
-    let pool = PgPoolOptions::new().connect(&std::env::var("DATABASE_URL")?).await?;
+    let url = std::env::var("DATABASE_URL")?;
+    let riwayat = argumen_riwayat()?;
+    if riwayat.is_some() && !url.contains("_uji") {
+        return Err("--riwayat hanya untuk basis data uji (DATABASE_URL harus mengandung \"_uji\")".into());
+    }
+    let pool = PgPoolOptions::new().connect(&url).await?;
     sqlx::migrate!().run(&pool).await?;
 
     let username = std::env::var("ADMIN_USERNAME").unwrap_or_else(|_| "admin".into());
@@ -96,11 +101,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sudah_ada = sqlx::query_scalar!(r#"SELECT EXISTS (SELECT 1 FROM produk) AS "ada!""#).fetch_one(&pool).await?;
     if sudah_ada {
         println!("Tabel produk sudah berisi data; pengisian produk dilewati.");
-        return Ok(());
+    } else {
+        isi_produk(&pool).await?;
     }
 
+    if let Some(hari) = riwayat {
+        isi_riwayat(&pool, &url, hari).await?;
+    }
+
+    Ok(())
+}
+
+async fn isi_produk(pool: &PgPool) -> Result<(), Box<dyn std::error::Error>> {
     let id_admin = sqlx::query_scalar!("SELECT id_pengguna FROM pengguna WHERE peran = 'admin' ORDER BY id_pengguna LIMIT 1")
-        .fetch_one(&pool)
+        .fetch_one(pool)
         .await?;
 
     let mut tx = pool.begin().await?;
@@ -158,5 +172,125 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     tx.commit().await?;
     println!("Data contoh diisi: {} produk, {jumlah_varian} varian.", PRODUK.len());
+    Ok(())
+}
+
+/// `--riwayat <hari>`: jumlah hari riwayat penjualan sintetis yang dibuat.
+fn argumen_riwayat() -> Result<Option<i64>, Box<dyn std::error::Error>> {
+    let args: Vec<String> = std::env::args().collect();
+    match args.iter().position(|a| a == "--riwayat") {
+        Some(i) => {
+            let hari: i64 = args.get(i + 1).ok_or("--riwayat butuh jumlah hari, mis. --riwayat 90")?.parse()?;
+            if !(1..=730).contains(&hari) {
+                return Err("--riwayat harus 1 sampai 730 hari".into());
+            }
+            Ok(Some(hari))
+        }
+        None => Ok(None),
+    }
+}
+
+/// Membuat riwayat penjualan SINTETIS (sekitar 40 transaksi per hari) untuk
+/// uji kinerja laporan (Tabel 1: laporan bulanan <= 5 detik). Hanya untuk
+/// basis data uji: kasirnya bernama "Data Contoh (sintetis)" dan faktur
+/// berawalan UJI-, sehingga tidak pernah tertukar dengan data nyata toko.
+/// Stok dan kartu stok sengaja tidak diubah.
+async fn isi_riwayat(pool: &PgPool, url: &str, hari: i64) -> Result<(), Box<dyn std::error::Error>> {
+    use rand::{Rng, SeedableRng, rngs::StdRng};
+
+    debug_assert!(url.contains("_uji"));
+    let hash = sandi::hash("sintetis12345".into()).await?;
+    let id_kasir = sqlx::query_scalar!(
+        r#"INSERT INTO pengguna (nama, username, kata_sandi, peran, aktif)
+           VALUES ('Data Contoh (sintetis)', 'kasir_sintetis', $1, 'kasir', FALSE)
+           ON CONFLICT (username) DO UPDATE SET nama = EXCLUDED.nama
+           RETURNING id_pengguna"#,
+        hash
+    )
+    .fetch_one(pool)
+    .await?;
+
+    let varian = sqlx::query!(
+        r#"SELECT v.id_varian, p.nama || ' ' || v.ukuran || '/' || v.warna AS "nama!", p.harga_jual, p.harga_beli
+           FROM varian v JOIN produk p ON p.id_produk = v.id_produk WHERE v.aktif AND p.aktif ORDER BY v.id_varian"#
+    )
+    .fetch_all(pool)
+    .await?;
+    if varian.is_empty() {
+        return Err("Belum ada produk; jalankan seed tanpa --riwayat terlebih dahulu".into());
+    }
+
+    let mut acak = StdRng::seed_from_u64(20261101);
+    let mut tx = pool.begin().await?;
+    let mut jumlah = 0usize;
+    for h in (1..=hari).rev() {
+        let id_sesi = sqlx::query_scalar!(
+            r#"INSERT INTO sesi_kasir (id_pengguna, waktu_buka, modal_awal)
+               VALUES ($1, (CURRENT_DATE - $2::int)::timestamp + interval '9 hours', 0) RETURNING id_sesi"#,
+            id_kasir,
+            h as i32
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        let mut tunai = 0i64;
+        let banyak = acak.gen_range(30..=50);
+        for n in 0..banyak {
+            let baris = acak.gen_range(1..=3);
+            let mut item = Vec::new();
+            for _ in 0..baris {
+                let v = &varian[acak.gen_range(0..varian.len())];
+                let q: i32 = acak.gen_range(1..=2);
+                item.push((v.id_varian, v.nama.clone(), q, v.harga_jual, v.harga_beli));
+            }
+            let total: i64 = item.iter().map(|i| i.2 as i64 * i.3).sum();
+            let metode = ["tunai", "tunai", "qris", "transfer"][acak.gen_range(0..4)];
+            if metode == "tunai" {
+                tunai += total;
+            }
+            let menit = 9 * 60 + n * (12 * 60) / banyak;
+            let id_transaksi = sqlx::query_scalar!(
+                r#"INSERT INTO transaksi (no_faktur, id_sesi, id_pengguna, tanggal_waktu, subtotal, diskon, total, metode_bayar, bayar, kembalian)
+                   VALUES ('UJI-' || to_char(CURRENT_DATE - $1::int, 'YYMMDD') || '-' || lpad($2::text, 4, '0'), $3, $4,
+                           (CURRENT_DATE - $1::int)::timestamp + make_interval(mins => $5), $6, 0, $6, $7, $6, 0)
+                   RETURNING id_transaksi"#,
+                h as i32,
+                n.to_string(),
+                id_sesi,
+                id_kasir,
+                menit as i32,
+                total,
+                metode,
+            )
+            .fetch_one(&mut *tx)
+            .await?;
+            for (id_varian, nama, q, harga, pokok) in item {
+                sqlx::query!(
+                    r#"INSERT INTO detail_transaksi (id_transaksi, id_varian, nama_barang, jumlah, harga_satuan, harga_pokok, diskon_item, subtotal)
+                       VALUES ($1, $2, $3, $4, $5, $6, 0, $7)"#,
+                    id_transaksi,
+                    id_varian,
+                    nama,
+                    q,
+                    harga,
+                    pokok,
+                    q as i64 * harga,
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+            jumlah += 1;
+        }
+        sqlx::query!(
+            r#"UPDATE sesi_kasir SET waktu_tutup = waktu_buka + interval '12 hours', kas_fisik = $2, kas_seharusnya = $2, selisih = 0
+               WHERE id_sesi = $1"#,
+            id_sesi,
+            tunai
+        )
+        .execute(&mut *tx)
+        .await?;
+    }
+    tx.commit().await?;
+    println!("Riwayat sintetis dibuat: {jumlah} transaksi selama {hari} hari (kasir \"Data Contoh (sintetis)\").");
     Ok(())
 }

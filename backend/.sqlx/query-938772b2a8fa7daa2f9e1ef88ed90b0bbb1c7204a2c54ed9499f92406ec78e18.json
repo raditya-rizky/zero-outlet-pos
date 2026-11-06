@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(sum(dr.jumlah * d.harga_pokok), 0)::bigint AS \"hpp!\"\n           FROM detail_retur dr\n           JOIN retur r ON r.id_retur = dr.id_retur\n           JOIN detail_transaksi d ON d.id_detail = dr.id_detail\n           JOIN transaksi t ON t.id_transaksi = r.id_transaksi\n           WHERE r.status = 'disetujui' AND r.jenis = 'retur'\n             AND r.waktu_keputusan >= $1::date::timestamp AT TIME ZONE $3\n             AND r.waktu_keputusan < ($2::date + 1)::timestamp AT TIME ZONE $3\n             AND ($4::bigint IS NULL OR t.id_pengguna = $4)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "hpp!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "938772b2a8fa7daa2f9e1ef88ed90b0bbb1c7204a2c54ed9499f92406ec78e18"
+}

@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH baris AS (\n             SELECT d.id_detail, d.id_transaksi, d.id_varian, d.jumlah, d.subtotal, t.diskon,\n                    CASE WHEN t.subtotal > 0 THEN t.diskon * d.subtotal / t.subtotal ELSE 0 END AS bagian,\n                    row_number() OVER (PARTITION BY d.id_transaksi ORDER BY d.subtotal DESC, d.id_detail DESC) AS urut\n             FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi\n             WHERE t.status = 'selesai'\n               AND t.tanggal_waktu >= $1::date::timestamp AT TIME ZONE $3\n               AND t.tanggal_waktu < ($2::date + 1)::timestamp AT TIME ZONE $3\n               AND ($4::bigint IS NULL OR t.id_pengguna = $4)\n           ), bersih AS (\n             SELECT b.id_varian, b.jumlah,\n                    b.subtotal - b.bagian\n                      - CASE WHEN b.urut = 1 THEN b.diskon - sum(b.bagian) OVER (PARTITION BY b.id_transaksi) ELSE 0 END AS nilai\n             FROM baris b\n           )\n           SELECT p.id_produk, p.kode, p.nama AS nama_produk, k.nama_kategori AS kategori, upper(v.ukuran) AS \"ukuran!\",\n                  sum(x.jumlah)::bigint AS \"unit!\", sum(x.nilai)::bigint AS \"nilai!\"\n           FROM bersih x\n           JOIN varian v ON v.id_varian = x.id_varian\n           JOIN produk p ON p.id_produk = v.id_produk\n           JOIN kategori k ON k.id_kategori = p.id_kategori\n           GROUP BY p.id_produk, p.kode, p.nama, k.nama_kategori, upper(v.ukuran)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "kode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "nama_produk",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "kategori",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "ukuran!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "unit!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "nilai!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "f9c380617546dbd25605ef5516d0e8e34cdd6336f9c230832709a7f2db887fb6"
+}

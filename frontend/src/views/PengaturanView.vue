@@ -7,6 +7,7 @@ import UiKepalaHalaman from '@/components/ui/UiKepalaHalaman.vue'
 import UiPesan from '@/components/ui/UiPesan.vue'
 import UiTombol from '@/components/ui/UiTombol.vue'
 import type { Pengaturan } from '@/types'
+import NavPengaturan from '@/components/NavPengaturan.vue'
 
 // Pengaturan toko yang dipakai struk, diskon kasir, retur, dan peringatan stok.
 const atur = ref<Pengaturan | null>(null)
@@ -41,6 +42,7 @@ async function simpan() {
 <template>
   <UiHalaman ukuran="sedang" as="form" @submit.prevent="simpan">
     <UiKepalaHalaman judul="Pengaturan" />
+    <NavPengaturan />
     <UiPesan v-if="pesan" jenis="berhasil">{{ pesan }}</UiPesan>
     <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>
 

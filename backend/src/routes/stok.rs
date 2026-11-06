@@ -190,24 +190,7 @@ async fn peringatan(_: Admin, State(state): State<AppState>) -> AppResult<Json<P
     .fetch_all(&mut *conn)
     .await?;
 
-    let lambat_terjual = sqlx::query_as!(
-        VarianStok,
-        r#"SELECT v.id_varian, v.id_produk, p.nama AS nama_produk, p.kode, v.sku, v.ukuran, v.warna, v.stok, v.stok_minimum,
-                  (SELECT max(t.tanggal_waktu) FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi
-                   WHERE d.id_varian = v.id_varian AND t.status = 'selesai') AS terakhir_terjual
-           FROM varian v JOIN produk p ON p.id_produk = v.id_produk
-           WHERE v.aktif AND p.aktif AND v.stok > 0
-             AND p.dibuat_pada < now() - make_interval(days => $1)
-             AND NOT EXISTS (
-               SELECT 1 FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi
-               WHERE d.id_varian = v.id_varian AND t.status = 'selesai'
-                 AND t.tanggal_waktu >= now() - make_interval(days => $1)
-             )
-           ORDER BY terakhir_terjual NULLS FIRST, p.nama, v.ukuran, v.warna"#,
-        hari as i32
-    )
-    .fetch_all(&mut *conn)
-    .await?;
+    let lambat_terjual = stok::lambat_terjual(&mut conn, hari).await?;
 
     Ok(Json(PeringatanStok { hari_lambat_terjual: hari, menipis, lambat_terjual }))
 }

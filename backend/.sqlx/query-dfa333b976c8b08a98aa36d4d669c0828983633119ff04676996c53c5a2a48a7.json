@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO biaya_operasional (tanggal, kategori, nominal, keterangan, id_pengguna) VALUES ($1, $2, $3, $4, $5) RETURNING id_biaya",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_biaya",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Text",
+        "Int8",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "dfa333b976c8b08a98aa36d4d669c0828983633119ff04676996c53c5a2a48a7"
+}

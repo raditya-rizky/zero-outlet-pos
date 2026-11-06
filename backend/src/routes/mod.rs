@@ -4,6 +4,8 @@ use crate::{AppError, AppState};
 
 mod auth;
 mod barang_masuk;
+mod biaya;
+mod laporan;
 mod log;
 mod pengajuan;
 mod pengaturan;
@@ -25,5 +27,7 @@ pub fn router() -> Router<AppState> {
         .merge(pengajuan::router())
         .merge(barang_masuk::router())
         .merge(stok::router())
+        .merge(laporan::router())
+        .merge(biaya::router())
         .fallback(|| async { AppError::tidak_ditemukan("Endpoint tidak ditemukan") })
 }

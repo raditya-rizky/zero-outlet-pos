@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"transaksi!\", coalesce(sum(t.total), 0)::bigint AS \"total!\"\n           FROM transaksi t\n           WHERE t.status = 'selesai'\n             AND t.tanggal_waktu >= $1::date::timestamp AT TIME ZONE $3\n             AND t.tanggal_waktu < ($2::date + 1)::timestamp AT TIME ZONE $3\n             AND ($4::bigint IS NULL OR t.id_pengguna = $4)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "transaksi!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "total!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "9c8673d77ead938bca1e74311294f7f2bf9eeb8adb45b9d707c9dbd41a9bf018"
+}

@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.metode_pengembalian AS \"metode!\", sum(r.total_pengembalian)::bigint AS \"retur!\"\n           FROM retur r JOIN transaksi t ON t.id_transaksi = r.id_transaksi\n           WHERE r.status = 'disetujui' AND r.jenis = 'retur'\n             AND r.waktu_keputusan >= $1::date::timestamp AT TIME ZONE $3\n             AND r.waktu_keputusan < ($2::date + 1)::timestamp AT TIME ZONE $3\n             AND ($4::bigint IS NULL OR t.id_pengguna = $4)\n           GROUP BY r.metode_pengembalian",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "metode!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "retur!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true,
+      null
+    ]
+  },
+  "hash": "11d6572a6cbca49e5b219042eaecf315bc59b4ee38f2598ed23c65f978fa364b"
+}

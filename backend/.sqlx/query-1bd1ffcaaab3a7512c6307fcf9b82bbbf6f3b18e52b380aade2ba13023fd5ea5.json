@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id_sesi, p.nama AS nama_kasir, s.waktu_buka, s.waktu_tutup, s.selisih, s.alasan_selisih\n           FROM sesi_kasir s JOIN pengguna p ON p.id_pengguna = s.id_pengguna\n           WHERE s.waktu_tutup IS NULL ORDER BY s.waktu_buka",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_sesi",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "nama_kasir",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "waktu_buka",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "waktu_tutup",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "selisih",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "alasan_selisih",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "1bd1ffcaaab3a7512c6307fcf9b82bbbf6f3b18e52b380aade2ba13023fd5ea5"
+}

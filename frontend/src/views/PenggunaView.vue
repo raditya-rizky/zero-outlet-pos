@@ -12,6 +12,7 @@ import UiLencana from '@/components/ui/UiLencana.vue'
 import UiPesan from '@/components/ui/UiPesan.vue'
 import UiTabel from '@/components/ui/UiTabel.vue'
 import UiTombol from '@/components/ui/UiTombol.vue'
+import NavPengaturan from '@/components/NavPengaturan.vue'
 
 const auth = useAuth()
 const data = ref<Pengguna[]>([])
@@ -83,6 +84,7 @@ onMounted(muat)
       </template>
       <template #aksi><UiTombol @click="tambah">Tambah pengguna</UiTombol></template>
     </UiKepalaHalaman>
+    <NavPengaturan />
 
     <UiPesan v-if="pesan" jenis="berhasil">{{ pesan }}</UiPesan>
     <UiPesan v-if="galat" jenis="galat">{{ galat }}</UiPesan>

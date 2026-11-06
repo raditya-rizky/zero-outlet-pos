@@ -10,6 +10,7 @@ import UiLencana from '@/components/ui/UiLencana.vue'
 import UiPesan from '@/components/ui/UiPesan.vue'
 import UiTabel from '@/components/ui/UiTabel.vue'
 import UiTombol from '@/components/ui/UiTombol.vue'
+import NavLaporan from '@/components/NavLaporan.vue'
 
 const d = new Date()
 d.setDate(d.getDate() - 6)
@@ -44,6 +45,7 @@ onMounted(async () => {
     <UiKepalaHalaman judul="Sesi kasir">
       <template #deskripsi>Rekonsiliasi kas setiap shift. Tinjau sesi dengan selisih beserta alasannya.</template>
     </UiKepalaHalaman>
+    <NavLaporan />
 
     <form class="flex flex-wrap items-end gap-3 [&>label]:flex-[1_1_160px]" @submit.prevent="muat">
       <UiIsian label="Dari"><input v-model="dari" type="date" /></UiIsian>

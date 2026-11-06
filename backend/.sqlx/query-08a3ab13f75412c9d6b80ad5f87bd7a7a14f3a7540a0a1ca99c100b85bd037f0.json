@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(sum(r.total_pengembalian), 0)::bigint AS \"retur!\"\n           FROM retur r JOIN transaksi t ON t.id_transaksi = r.id_transaksi\n           WHERE r.status = 'disetujui' AND r.jenis = 'retur'\n             AND r.waktu_keputusan >= $1::date::timestamp AT TIME ZONE $3\n             AND r.waktu_keputusan < ($2::date + 1)::timestamp AT TIME ZONE $3\n             AND ($4::bigint IS NULL OR t.id_pengguna = $4)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "retur!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "08a3ab13f75412c9d6b80ad5f87bd7a7a14f3a7540a0a1ca99c100b85bd037f0"
+}

@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id_varian, p.id_produk, p.kode, p.nama AS nama_produk, k.nama_kategori AS kategori, v.ukuran, v.warna, v.sku,\n                  v.stok, v.stok_minimum, p.harga_beli, (v.stok * p.harga_beli)::bigint AS \"nilai!\"\n           FROM varian v\n           JOIN produk p ON p.id_produk = v.id_produk\n           JOIN kategori k ON k.id_kategori = p.id_kategori\n           WHERE v.aktif AND p.aktif\n           ORDER BY k.nama_kategori, p.nama,\n                    array_position(ARRAY['XS','S','M','L','XL','XXL','XXXL'], upper(v.ukuran)) NULLS LAST, v.ukuran, v.warna",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_varian",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "id_produk",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "kode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "nama_produk",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "kategori",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "ukuran",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "warna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "sku",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "stok",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "stok_minimum",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "harga_beli",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 11,
+        "name": "nilai!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "a15af802093a55f2420c4571b4a25a2d8f7c1b6afa8c055790fcf015dfbc8462"
+}

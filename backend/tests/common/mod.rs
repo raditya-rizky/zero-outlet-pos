@@ -51,6 +51,19 @@ impl Klien {
         (status, json)
     }
 
+    /// GET tanpa mengurai JSON, untuk unduhan berkas (CSV).
+    pub async fn mentah(&self, uri: &str) -> (StatusCode, axum::http::HeaderMap, Vec<u8>) {
+        let mut req = Request::builder().method(Method::GET).uri(uri);
+        if let Some(c) = &self.cookie {
+            req = req.header(header::COOKIE, c);
+        }
+        let res = self.app.clone().oneshot(req.body(Body::empty()).unwrap()).await.unwrap();
+        let status = res.status();
+        let headers = res.headers().clone();
+        let bytes = res.into_body().collect().await.unwrap().to_bytes().to_vec();
+        (status, headers, bytes)
+    }
+
     pub async fn get(&self, uri: &str) -> (StatusCode, Value) {
         self.kirim(Method::GET, uri, None).await
     }

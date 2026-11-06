@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO transaksi (no_faktur, id_sesi, id_pengguna, tanggal_waktu, subtotal, diskon, total, metode_bayar, bayar, kembalian)\n                   VALUES ('UJI-' || to_char(CURRENT_DATE - $1::int, 'YYMMDD') || '-' || lpad($2::text, 4, '0'), $3, $4,\n                           (CURRENT_DATE - $1::int)::timestamp + make_interval(mins => $5), $6, 0, $6, $7, $6, 0)\n                   RETURNING id_transaksi",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_transaksi",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Int8",
+        "Int8",
+        "Int4",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "85a98289180203586a3f24322d61d3017edc55930aa43428b53fa34cd067ef30"
+}

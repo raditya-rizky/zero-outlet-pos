@@ -313,3 +313,140 @@ export interface Lencana {
   pengajuan_menunggu: number
   stok_menipis: number
 }
+
+// ---------- Siklus 3: laporan ----------
+
+export interface Ringkasan {
+  transaksi: number
+  unit: number
+  kotor: number
+  diskon: number
+  retur: number
+  bersih: number
+  rata_rata: number
+  hpp?: number
+}
+
+export interface TitikTren {
+  tanggal: string
+  total: number
+  transaksi: number
+}
+
+export interface BarisRincian {
+  kunci: string
+  label: string
+  unit: number
+  penjualan: number
+}
+
+export interface BarisMetode {
+  metode: MetodeBayar
+  transaksi: number
+  penjualan: number
+  retur: number
+}
+
+export interface BarisKasir {
+  id_pengguna: number
+  nama: string
+  transaksi: number
+  penjualan: number
+  retur: number
+}
+
+export interface LaporanPenjualan {
+  dari: string
+  sampai: string
+  kelompok: 'hari' | 'bulan'
+  ringkasan: Ringkasan
+  tren: TitikTren[]
+  per_produk: BarisRincian[]
+  per_kategori: BarisRincian[]
+  per_ukuran: BarisRincian[]
+  per_metode: BarisMetode[]
+  per_kasir?: BarisKasir[]
+  terlaris: BarisRincian[]
+  lambat_terjual?: VarianStok[]
+}
+
+export interface BiayaKategori {
+  kategori: string
+  nominal: number
+}
+
+export interface PeriodeLabaRugi {
+  dari: string
+  sampai: string
+  kotor: number
+  diskon: number
+  retur: number
+  bersih: number
+  hpp: number
+  laba_kotor: number
+  biaya: number
+  laba_bersih: number
+  margin_kotor_bps: number | null
+  margin_bersih_bps: number | null
+  biaya_per_kategori: BiayaKategori[]
+}
+
+export interface LabaRugi {
+  sekarang: PeriodeLabaRugi
+  sebelumnya: PeriodeLabaRugi
+}
+
+export interface BarisStok {
+  id_varian: number
+  id_produk: number
+  kode: string
+  nama_produk: string
+  kategori: string
+  ukuran: string
+  warna: string
+  sku: string
+  stok: number
+  stok_minimum: number
+  harga_beli: number
+  nilai: number
+}
+
+export interface LaporanStok {
+  varian: BarisStok[]
+  total_unit: number
+  total_nilai: number
+}
+
+export interface SesiRingkas {
+  id_sesi: number
+  nama_kasir: string
+  waktu_buka: string
+  waktu_tutup: string | null
+  selisih: number | null
+  alasan_selisih: string | null
+}
+
+export interface Dasbor {
+  hari_ini: string
+  ringkasan_hari_ini: Ringkasan
+  ringkasan_kemarin: Ringkasan
+  tren: TitikTren[]
+  terlaris_7_hari: BarisRincian[]
+  stok_menipis: number
+  varian_menipis: VarianStok[]
+  pengajuan_menunggu: number
+  sesi_aktif: SesiRingkas[]
+  sesi_terakhir: SesiRingkas[]
+}
+
+export const KATEGORI_BIAYA = ['Sewa tempat', 'Listrik dan air', 'Upah karyawan', 'Pengemasan', 'Promosi', 'Lain-lain'] as const
+
+export interface Biaya {
+  id_biaya: number
+  tanggal: string
+  kategori: (typeof KATEGORI_BIAYA)[number]
+  nominal: number
+  keterangan: string | null
+  nama_pengguna: string
+  dibuat_pada: string
+}

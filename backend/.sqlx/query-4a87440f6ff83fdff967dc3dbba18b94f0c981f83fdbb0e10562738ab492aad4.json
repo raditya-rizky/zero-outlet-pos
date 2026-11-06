@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT b.id_biaya, b.tanggal, b.kategori, b.nominal, b.keterangan, p.nama AS nama_pengguna, b.dibuat_pada\n           FROM biaya_operasional b JOIN pengguna p ON p.id_pengguna = b.id_pengguna\n           WHERE b.id_biaya = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_biaya",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "tanggal",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "kategori",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "nominal",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "keterangan",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "nama_pengguna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "dibuat_pada",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "4a87440f6ff83fdff967dc3dbba18b94f0c981f83fdbb0e10562738ab492aad4"
+}

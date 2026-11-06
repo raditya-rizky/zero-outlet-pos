@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT b.id_biaya, b.tanggal, b.kategori, b.nominal, b.keterangan, p.nama AS nama_pengguna, b.dibuat_pada\n           FROM biaya_operasional b JOIN pengguna p ON p.id_pengguna = b.id_pengguna\n           WHERE ($1::date IS NULL OR b.tanggal >= $1) AND ($2::date IS NULL OR b.tanggal <= $2)\n           ORDER BY b.tanggal DESC, b.id_biaya DESC\n           LIMIT 500",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id_biaya",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "tanggal",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "kategori",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "nominal",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "keterangan",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "nama_pengguna",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "dibuat_pada",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "20a2b01efb2b492aa1a60a59d002af24e7c12c5d05eb06769541b1ed2fb0c161"
+}

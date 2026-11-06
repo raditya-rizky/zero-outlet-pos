@@ -3,7 +3,7 @@
 
 use sqlx::PgConnection;
 
-use crate::{AppError, AppResult};
+use crate::{AppError, AppResult, models::stok::VarianStok};
 
 pub struct Mutasi<'a> {
     pub id_varian: i64,
@@ -63,4 +63,28 @@ pub async fn terapkan(conn: &mut PgConnection, m: Mutasi<'_>) -> AppResult<i32> 
     .await?;
 
     Ok(stok_sesudah)
+}
+
+/// Varian lambat terjual per hari ini (KF-14): masih ada stok, tidak terjual
+/// selama `hari` hari terakhir, dan produknya bukan barang baru.
+pub async fn lambat_terjual(conn: &mut PgConnection, hari: i64) -> AppResult<Vec<VarianStok>> {
+    sqlx::query_as!(
+        VarianStok,
+        r#"SELECT v.id_varian, v.id_produk, p.nama AS nama_produk, p.kode, v.sku, v.ukuran, v.warna, v.stok, v.stok_minimum,
+                  (SELECT max(t.tanggal_waktu) FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi
+                   WHERE d.id_varian = v.id_varian AND t.status = 'selesai') AS terakhir_terjual
+           FROM varian v JOIN produk p ON p.id_produk = v.id_produk
+           WHERE v.aktif AND p.aktif AND v.stok > 0
+             AND p.dibuat_pada < now() - make_interval(days => $1)
+             AND NOT EXISTS (
+               SELECT 1 FROM detail_transaksi d JOIN transaksi t ON t.id_transaksi = d.id_transaksi
+               WHERE d.id_varian = v.id_varian AND t.status = 'selesai'
+                 AND t.tanggal_waktu >= now() - make_interval(days => $1)
+             )
+           ORDER BY terakhir_terjual NULLS FIRST, p.nama, v.ukuran, v.warna"#,
+        hari as i32
+    )
+    .fetch_all(&mut *conn)
+    .await
+    .map_err(Into::into)
 }

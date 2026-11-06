@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, pesanError } from '@/api'
 import KertasStruk from '@/components/KertasStruk.vue'
@@ -27,6 +27,7 @@ onMounted(async () => {
     // Hapus penanda dari URL agar memuat ulang halaman tidak menambah hitungan cetak.
     if (cetakUlang) router.replace({ query: { ...route.query, cetak_ulang: undefined } })
     await nextTick()
+    aturUkuranKertas()
     tombolCetak.value?.$el.focus()
   } catch (e) {
     galat.value = pesanError(e)
@@ -36,6 +37,19 @@ onMounted(async () => {
 function cetak() {
   window.print()
 }
+
+// Kertas thermal 58 mm: tinggi halaman mengikuti panjang struk agar printer
+// memotong tepat setelah catatan kaki, bukan memakai ukuran kertas bawaan.
+const areaStruk = ref<HTMLElement>()
+let gayaKertas: HTMLStyleElement | null = null
+function aturUkuranKertas() {
+  const tinggi = areaStruk.value?.querySelector('article')?.getBoundingClientRect().height
+  if (!tinggi) return
+  const mm = Math.ceil((tinggi * 25.4) / 96) + 4
+  gayaKertas ??= document.head.appendChild(document.createElement('style'))
+  gayaKertas.textContent = `@media print { @page { size: 58mm ${mm}mm; margin: 0; } }`
+}
+onBeforeUnmount(() => gayaKertas?.remove())
 
 // Pembatalan/retur/tukar untuk transaksi ini (KF-10).
 const faktur = ref<FakturPengajuan | null>(null)
@@ -62,7 +76,7 @@ async function ajukan() {
       </UiKepalaHalaman>
 
       <div class="flex flex-wrap items-start gap-6">
-        <div class="rounded-sedang bg-kertas p-6 print:bg-transparent print:p-0">
+        <div ref="areaStruk" class="rounded-sedang bg-kertas p-6 print:bg-transparent print:p-0">
           <KertasStruk :struk="struk" class="border border-garis print:border-0" />
         </div>
         <div class="grid flex-[1_1_220px] gap-2.5 print:hidden">
